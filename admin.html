@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | AI Sprint 2</title>
+  <style>
+    :root {
+      --orange: #EE4D2D;
+      --navy: #113366;
+      --navy-light: #1a4a8a;
+      --bg: #f7f7f7;
+      --white: #ffffff;
+      --text: #222222;
+      --muted: #666666;
+      --border: #e0e0e0;
+      --green: #1a8a4a;
+      --green-bg: #f0faf4;
+      --green-border: #b3dfc5;
+      --red: #cc2200;
+      --red-bg: #fff5f3;
+      --yellow: #a06000;
+      --yellow-bg: #fffbf0;
+      --yellow-border: #f0d080;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    nav {
+      background: var(--navy);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo { color: var(--white); font-weight: 700; font-size: 1rem; }
+    .nav-logo span { color: var(--orange); }
+    .nav-right { display: flex; align-items: center; gap: 1.25rem; }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--white); }
+    .nav-user { display: flex; align-items: center; gap: 0.5rem; color: rgba(255,255,255,0.85); font-size: 0.8rem; }
+    .nav-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3); }
+    .nav-avatar-initials { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.25); color: #fff; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .nav-signout { color: rgba(255,255,255,0.5); font-size: 0.75rem; cursor: pointer; text-decoration: underline; background: none; border: none; padding: 0; }
+    .nav-signout:hover { color: rgba(255,255,255,0.85); }
+
+    /* AUTH / DENY */
+    .auth-gate, .deny-gate {
+      min-height: calc(100vh - 56px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .gate-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+    .gate-card .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .gate-card h2 { font-size: 1.3rem; font-weight: 800; color: var(--navy); margin-bottom: 0.5rem; }
+    .gate-card p { font-size: 0.875rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .btn-google {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--white);
+      border: 2px solid var(--border);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .btn-google:hover { border-color: var(--navy); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+    /* PAGE */
+    .main-content { display: none; }
+    .page-header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+      color: var(--white);
+      padding: 2rem 2rem 1.75rem;
+    }
+    .page-header-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .page-header-eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.55); margin-bottom: 0.35rem; }
+    .page-header h1 { font-size: 1.6rem; font-weight: 800; }
+    .admin-badge {
+      background: rgba(238,77,45,0.2);
+      border: 1px solid rgba(238,77,45,0.5);
+      color: var(--orange);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 8px;
+      border-radius: 5px;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 2rem 2rem; }
+
+    /* FILTER BAR */
+    .filter-bar {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .filter-bar label { font-size: 0.78rem; font-weight: 600; color: var(--muted); flex-shrink: 0; }
+    .filter-bar select, .filter-bar input {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.4rem 0.65rem;
+      font-size: 0.82rem;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .filter-bar select:focus, .filter-bar input:focus { border-color: var(--orange); }
+    .filter-input { min-width: 180px; }
+    .filter-divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+    .filter-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .filter-toggle.active { border-color: var(--orange); color: var(--orange); background: #fff8f7; }
+    .filter-toggle:hover { border-color: var(--navy); color: var(--navy); }
+    .filter-toggle.active:hover { border-color: var(--orange); color: var(--orange); }
+
+    /* TABS */
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 1.5rem; }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 0.65rem 1.1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.2s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--navy); border-bottom-color: var(--orange); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* SUMMARY CHIPS */
+    .summary-row { display: flex; gap: 0.65rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .summary-chip {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.55rem 0.9rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .summary-chip strong { color: var(--text); font-size: 1rem; }
+    .summary-chip.warn { border-color: var(--yellow-border); background: var(--yellow-bg); color: var(--yellow); }
+    .summary-chip.warn strong { color: var(--yellow); }
+
+    /* MODULE ASSIGN TABLE */
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table th {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    .admin-table td {
+      padding: 0.7rem 0.75rem;
+      font-size: 0.83rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: #fafafa; }
+
+    .cell-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: #eef0f5;
+      color: var(--navy);
+      margin-right: 3px;
+    }
+
+    .assign-select {
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.78rem;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      min-width: 160px;
+      transition: border-color 0.2s;
+    }
+    .assign-select:focus { border-color: var(--orange); }
+
+    .btn-assign {
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.3rem 0.65rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .btn-assign:hover { opacity: 0.85; }
+    .btn-assign:disabled { opacity: 0.4; cursor: default; }
+
+    .unassigned-pill {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--yellow-bg);
+      border: 1px solid var(--yellow-border);
+      color: var(--yellow);
+    }
+    .assigned-pill {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
+      color: var(--green);
+    }
+    .assignee-row {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-bottom: 3px;
+    }
+    .assignee-row:last-child { margin-bottom: 0; }
+    .btn-assignee-remove {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0 4px;
+      border-radius: 3px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .btn-assignee-remove:hover { color: var(--red); background: var(--red-bg); }
+
+    /* PLAN REVIEW CARDS */
+    .review-grid { display: flex; flex-direction: column; gap: 1rem; }
+    .review-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .review-card-header {
+      padding: 0.85rem 1.1rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .review-card-header:hover { background: #fafafa; }
+    .review-card.open .review-card-header { background: #fafafa; border-bottom: 1px solid var(--border); }
+    .review-header-left { flex: 1; min-width: 0; }
+    .review-person { font-size: 0.9rem; font-weight: 700; color: var(--navy); }
+    .review-meta { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
+    .review-idea-full { font-size: 0.88rem; color: var(--text); line-height: 1.55; }
+    .review-idea-full p { margin: 0 0 0.4rem 0; }
+    .review-idea-full p:last-child { margin-bottom: 0; }
+    .review-idea-full ul, .review-idea-full ol { margin: 0.25rem 0 0.4rem 1.25rem; }
+    .review-idea-full li { margin-bottom: 0.15rem; }
+    .review-idea-full a { color: var(--orange); }
+
+    /* Right-side role stub on collapsed card */
+    .role-stub {
+      width: 150px;
+      flex-shrink: 0;
+      padding: 0 0.85rem;
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      align-self: stretch;
+    }
+    .role-stub-section { }
+    .role-stub-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.25rem;
+    }
+    .role-stub-label.role-build { color: var(--green); }
+    .role-stub-label.role-test { color: var(--navy); }
+    .role-stub-name {
+      font-size: 0.78rem;
+      color: var(--text);
+      line-height: 1.35;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .role-stub-name.unreviewed { color: var(--red); font-weight: 600; }
+    .plan-dot { color: var(--red); font-size: 0.6rem; line-height: 1; }
+    .review-count {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .review-count.has-plans { border-color: var(--orange); color: var(--orange); background: #fff8f7; }
+    .review-count.all-reviewed { border-color: var(--green-border); color: var(--green); background: var(--green-bg); }
+    .review-count.no-plans { border-color: var(--yellow-border); color: var(--yellow); background: var(--yellow-bg); }
+    .chevron { font-size: 0.8rem; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; margin-top: 3px; }
+    .review-card.open .chevron { transform: rotate(180deg); }
+
+    .review-card-body { display: none; padding: 1rem 1.1rem; }
+    .review-card.open .review-card-body { display: block; }
+
+    .plan-review-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .plan-review-item:last-child { margin-bottom: 0; }
+    .plan-review-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .plan-ref { font-size: 0.78rem; font-weight: 700; color: var(--navy); }
+    .plan-ts { font-size: 0.72rem; color: var(--muted); }
+    .plan-text { font-size: 0.83rem; color: var(--text); line-height: 1.55; white-space: pre-wrap; margin-bottom: 0.75rem; }
+
+    .feedback-area { margin-top: 0.5rem; }
+    .feedback-area label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); display: block; margin-bottom: 0.35rem; }
+    .feedback-area textarea {
+      width: 100%;
+      min-height: 72px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.83rem;
+      font-family: inherit;
+      color: var(--text);
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .feedback-area textarea:focus { border-color: var(--orange); }
+    .feedback-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.4rem; }
+    .btn-save-fb {
+      background: var(--orange);
+      border: none;
+      color: var(--white);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.35rem 0.8rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-save-fb:hover { opacity: 0.88; }
+    .existing-feedback {
+      background: #fff8f7;
+      border: 1px solid #f5c4ba;
+      border-radius: 6px;
+      padding: 0.6rem 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .existing-feedback .fb-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--orange); margin-bottom: 0.2rem; }
+    .existing-feedback .fb-text { font-size: 0.8rem; color: var(--text); line-height: 1.5; }
+
+    /* IDEA REVIEW */
+    .idea-review-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .idea-review-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .idea-author { font-size: 0.8rem; font-weight: 700; color: var(--navy); }
+    .idea-ts { font-size: 0.72rem; color: var(--muted); }
+    .idea-body { font-size: 0.83rem; color: var(--text); line-height: 1.55; white-space: pre-wrap; margin-bottom: 0.65rem; }
+    .vol-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+    .vol-chip {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: #f0f4ff;
+      color: var(--navy);
+      border: 1px solid #c5d3f0;
+    }
+    .vol-chip.build { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+    .vol-chip.test { background: #f0f4ff; color: var(--navy); border-color: #c5d3f0; }
+    .no-vol-chip {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--yellow-bg);
+      color: var(--yellow);
+      border: 1px solid var(--yellow-border);
+    }
+
+    /* LOADING */
+    .loading-spinner { display: flex; flex-direction: column; align-items: center; padding: 3rem; gap: 0.75rem; color: var(--muted); font-size: 0.875rem; }
+    .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--orange); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state { padding: 2.5rem; text-align: center; color: var(--muted); font-size: 0.875rem; }
+
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.65rem 1.1rem;
+      border-radius: 8px;
+      z-index: 999;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: var(--green); }
+    .toast.error { background: var(--red); }
+
+    footer { text-align: center; padding: 2rem; font-size: 0.78rem; color: var(--muted); border-top: 1px solid var(--border); margin-top: 2rem; }
+
+    @media (max-width: 768px) {
+      .admin-table { display: block; overflow-x: auto; }
+      .filter-bar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">AI Sprint <span>2</span></div>
+    <div class="nav-right">
+      <div class="nav-links">
+        <a href="index.html">Briefing</a>
+        <a href="plan.html">My Plan</a>
+        <a href="admin.html" class="active">Admin</a>
+      </div>
+      <div class="nav-user" id="navUser" style="display:none;">
+        <img class="nav-avatar" id="navAvatar" src="" alt="" style="display:none;" onerror="this.style.display='none';document.getElementById('navAvatarInitials').style.display='flex';" />
+        <span class="nav-avatar-initials" id="navAvatarInitials" style="display:none;"></span>
+        <span id="navName"></span>
+        <button class="nav-signout" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="auth-gate" id="authGate">
+    <div class="gate-card">
+      <div class="icon">🔒</div>
+      <h2>Admin access</h2>
+      <p>Sign in with your Shopee Google account to continue.</p>
+      <button class="btn-google" onclick="signInWithGoogle()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58Z" fill="#EA4335"/>
+        </svg>
+        Sign in with Google
+      </button>
+    </div>
+  </div>
+
+  <div class="deny-gate" id="denyGate" style="display:none;">
+    <div class="gate-card">
+      <div class="icon">⛔</div>
+      <h2>Access denied</h2>
+      <p id="denyMsg">Your account is not on the admin list. Contact Amanda if you need access.</p>
+      <button class="btn-google" onclick="signOut()" style="margin-top:0.5rem;">Sign out</button>
+    </div>
+  </div>
+
+  <div class="main-content" id="mainContent">
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div>
+          <div class="page-header-eyebrow">Sprint 2 — Admin Panel</div>
+          <h1>Admin</h1>
+        </div>
+        <span class="admin-badge">Admin</span>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('tabA', this)">Track A — Modules</button>
+        <button class="tab-btn" onclick="switchTab('tabB', this)">Track B — Plans</button>
+        <button class="tab-btn" onclick="switchTab('tabC', this)">Track C — Ideas</button>
+      </div>
+
+      <!-- TRACK A -->
+      <div class="tab-panel active" id="tab-tabA">
+        <div class="filter-bar">
+          <label>Search:</label>
+          <input type="text" class="filter-input" id="searchAInput" placeholder="Module or assignee..." oninput="applyFilters()" />
+          <div class="filter-divider"></div>
+          <button class="filter-toggle" id="filterNoModule" onclick="toggleFilter('noModule')">Unassigned only</button>
+        </div>
+        <div id="trackASummary" class="summary-row"></div>
+        <div id="trackAAdmin">
+          <div class="loading-spinner"><div class="spinner"></div><span>Loading...</span></div>
+        </div>
+      </div>
+
+      <!-- TRACK B -->
+      <div class="tab-panel" id="tab-tabB">
+        <div class="filter-bar">
+          <label>Search builder:</label>
+          <input type="text" class="filter-input" id="searchBuilderInput" placeholder="Builder name..." oninput="applyFilters()" />
+          <label>Tool:</label>
+          <input type="text" class="filter-input" id="searchToolInput" placeholder="Tool name..." oninput="applyFilters()" />
+        </div>
+        <div id="trackBSummary" class="summary-row"></div>
+        <div id="trackBAdmin">
+          <div class="loading-spinner"><div class="spinner"></div><span>Loading...</span></div>
+        </div>
+      </div>
+
+      <!-- TRACK C -->
+      <div class="tab-panel" id="tab-tabC">
+        <div class="filter-bar">
+          <label>Search person:</label>
+          <input type="text" class="filter-input" id="searchCInput" placeholder="Name or email..." oninput="applyFilters()" />
+          <div class="filter-divider"></div>
+          <button class="filter-toggle" id="filterNoBuilder" onclick="toggleFilter('noBuilder')">No builder</button>
+          <button class="filter-toggle" id="filterNoTester" onclick="toggleFilter('noTester')">No tester</button>
+        </div>
+        <div id="trackCSummary" class="summary-row"></div>
+        <div id="trackCAdmin">
+          <div class="loading-spinner"><div class="spinner"></div><span>Loading...</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>Regional Supply Chain Product &middot; AI Sprint 2 &middot; May 2026 &middot; Admin</footer>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Set to true to enforce login on this page
+    window.AUTH_ENABLED = true;
+  </script>
+  <script type="module">
+    const AUTH_ENABLED = window.AUTH_ENABLED;
+    let initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, fbSignOut, onAuthStateChanged;
+    let getFirestore, collection, doc, addDoc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp;
+
+    if (AUTH_ENABLED) {
+      ({ initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'));
+      ({ getAuth, GoogleAuthProvider, signInWithPopup, signOut: fbSignOut, onAuthStateChanged }
+        = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js'));
+      ({ getFirestore, collection, doc, addDoc, getDocs, getDoc, setDoc, updateDoc, deleteDoc,
+        query, where, orderBy, serverTimestamp }
+        = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'));
+    }
+
+    // ─── CONFIG ───────────────────────────────────────────────────────────────
+    const firebaseConfig = {
+      apiKey: "AIzaSyAs4RlHjZ7P4MPeDf5u7ka60sDTt0O6z4k",
+      authDomain: "bpm-ai-sprint2.firebaseapp.com",
+      projectId: "bpm-ai-sprint2",
+      storageBucket: "bpm-ai-sprint2.firebasestorage.app",
+      messagingSenderId: "1016418343117",
+      appId: "1:1016418343117:web:967008a66a871c265ab184"
+    };
+
+    // Google Sheet IDs (same as plan.html)
+    const KB_SHEET_CSV_URL = "REPLACE_WITH_MODULES_SHEET_PUBLISHED_CSV_URL";
+    const TOOLS_SHEET_CSV_URL = "sprint1-tools.csv";
+
+    // Hardcoded admin emails — all equal
+    const ADMIN_EMAILS = [
+      "amanda.thng@shopee.com",
+      "stella.simsx@shopee.com",
+      "winarsita.sotyaji@shopee.com",
+      "clarence.chngkh@shopee.com",
+      "nicholas.chanck@shopee.com",
+      "gerald.yip@shopee.com",
+      "shengwu.peh@shopee.com",
+      "wayne.sim@shopee.com",
+      "shiliang.neoh@shopee.com",
+      "yeanhuar.lee@shopee.com",
+      "huifang.liu@shopee.com",
+      "qingwei.chua@shopee.com",
+      "sarah.pan@shopee.com",
+      "evelyn.lowyl@shopee.com",
+      "jin.tilo@shopee.com",
+    ];
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const app = AUTH_ENABLED ? initializeApp(firebaseConfig) : null;
+    const auth = AUTH_ENABLED ? getAuth(app) : null;
+    const db = AUTH_ENABLED ? getFirestore(app) : null;
+    const provider = AUTH_ENABLED ? new GoogleAuthProvider() : null;
+
+    let currentUser = null;
+    let activeFilters = { noBuilder: false, noTester: false, noModule: false };
+
+    // ── Auth ──────────────────────────────────────────────────────────────────
+
+    window.signInWithGoogle = async () => {
+      try { await signInWithPopup(auth, provider); }
+      catch { showToast('Sign-in failed.', 'error'); }
+    };
+
+    window.signOut = async () => { await fbSignOut(auth); };
+
+    function setNavAvatar(user) {
+      const img = document.getElementById('navAvatar');
+      const initials = document.getElementById('navAvatarInitials');
+      initials.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
+      if (user.photoURL) {
+        img.src = user.photoURL;
+        img.style.display = '';
+        initials.style.display = 'none';
+      } else {
+        img.style.display = 'none';
+        initials.style.display = 'flex';
+      }
+    }
+
+    if (!AUTH_ENABLED) {
+      currentUser = { email: ADMIN_EMAILS[0], displayName: 'Preview Admin', photoURL: '' };
+      hide('authGate'); hide('denyGate'); show('mainContent');
+      setTimeout(() => loadAll(), 0);
+    } else {
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          currentUser = null;
+          show('authGate'); hide('mainContent'); hide('denyGate');
+          document.getElementById('navUser').style.display = 'none';
+          return;
+        }
+        hide('authGate');
+        if (!ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+          document.getElementById('denyMsg').textContent =
+            user.email + ' is not on the admin list. Contact Amanda if you need access.';
+          show('denyGate'); hide('mainContent');
+          document.getElementById('navUser').style.display = 'flex';
+          setNavAvatar(user);
+          document.getElementById('navName').textContent = user.displayName || user.email;
+          return;
+        }
+        currentUser = user;
+        hide('denyGate'); show('mainContent');
+        document.getElementById('navUser').style.display = 'flex';
+        setNavAvatar(user);
+        document.getElementById('navName').textContent = user.displayName || user.email;
+        loadAll();
+      });
+    }
+
+    function show(id) { document.getElementById(id).style.display = 'block'; }
+    function hide(id) { document.getElementById(id).style.display = 'none'; }
+
+    // ── Tabs / Filters ────────────────────────────────────────────────────────
+
+    window.switchTab = (id, btn) => {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active');
+      btn.classList.add('active');
+      // Reset all filters and inputs when switching tabs
+      activeFilters = { noBuilder: false, noTester: false, noModule: false };
+      ['filterNoBuilder', 'filterNoTester', 'filterNoModule'].forEach(fid => {
+        document.getElementById(fid)?.classList.remove('active');
+      });
+      ['searchAInput', 'searchBuilderInput', 'searchToolInput', 'searchCInput'].forEach(iid => {
+        const el = document.getElementById(iid);
+        if (el) el.value = '';
+      });
+      applyFilters();
+    };
+
+    window.toggleFilter = (key) => {
+      activeFilters[key] = !activeFilters[key];
+      document.getElementById('filter' + cap(key)).classList.toggle('active', activeFilters[key]);
+      applyFilters();
+    };
+
+    window.applyFilters = () => {
+      const qA = (document.getElementById('searchAInput')?.value || '').toLowerCase();
+      const qBuilder = (document.getElementById('searchBuilderInput')?.value || '').toLowerCase();
+      const qTool = (document.getElementById('searchToolInput')?.value || '').toLowerCase();
+      const qC = (document.getElementById('searchCInput')?.value || '').toLowerCase();
+
+      // Track A rows
+      document.querySelectorAll('[data-module-row]').forEach(row => {
+        const person = (row.dataset.assignedTo || '').toLowerCase();
+        const name = (row.dataset.moduleName || '').toLowerCase();
+        const matchSearch = !qA || person.includes(qA) || name.includes(qA);
+        const matchNoModule = !activeFilters.noModule || !person;
+        row.style.display = (matchSearch && matchNoModule) ? '' : 'none';
+      });
+
+      // Track B cards
+      document.querySelectorAll('[data-review-card][data-track="B"]').forEach(card => {
+        const builders = (card.dataset.builders || '').toLowerCase();
+        const tools = (card.dataset.tools || '').toLowerCase();
+        const matchBuilder = !qBuilder || builders.includes(qBuilder);
+        const matchTool = !qTool || tools.includes(qTool);
+        card.style.display = (matchBuilder && matchTool) ? '' : 'none';
+      });
+
+      // Track C cards
+      document.querySelectorAll('[data-review-card][data-track="C"]').forEach(card => {
+        const person = (card.dataset.person || '').toLowerCase();
+        const noBuilder = card.dataset.noBuilder === 'true';
+        const noTester = card.dataset.noTester === 'true';
+        const matchSearch = !qC || person.includes(qC);
+        const matchNB = !activeFilters.noBuilder || noBuilder;
+        const matchNT = !activeFilters.noTester || noTester;
+        card.style.display = (matchSearch && matchNB && matchNT) ? '' : 'none';
+      });
+
+      // Hide Track C category sections with no visible cards
+      const isCFiltering = qC || activeFilters.noBuilder || activeFilters.noTester;
+      document.querySelectorAll('[id^="adm-cat-"]').forEach(section => {
+        if (section.id.startsWith('adm-cat-body-') || section.id.startsWith('adm-cat-chevron-')) return;
+        if (!isCFiltering) { section.style.display = ''; return; }
+        const cards = section.querySelectorAll('[data-review-card][data-track="C"]');
+        const anyVisible = Array.from(cards).some(c => c.style.display !== 'none');
+        section.style.display = anyVisible ? '' : 'none';
+      });
+    };
+
+    function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    // ── Toast ─────────────────────────────────────────────────────────────────
+
+    function showToast(msg, type = '') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast ' + type + ' show';
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ── CSV ───────────────────────────────────────────────────────────────────
+
+    function parseCSV(text) {
+      const rows = [];
+      for (const line of text.trim().split('\n')) {
+        const cols = []; let cur = ''; let inQ = false;
+        for (const c of line) {
+          if (c === '"') { inQ = !inQ; }
+          else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+          else { cur += c; }
+        }
+        cols.push(cur.trim());
+        rows.push(cols);
+      }
+      return rows;
+    }
+
+    async function fetchCSV(url) {
+      if (!url || url.startsWith('REPLACE')) return null;
+      try { const r = await fetch(url); return r.ok ? parseCSV(await r.text()) : null; }
+      catch { return null; }
+    }
+
+    function slugify(s) { return (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+    function escHtml(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    // Sanitise rich-text HTML: allowlist of safe inline/list tags. Handles plain text gracefully.
+    const ALLOWED_TAGS = new Set(['B','STRONG','I','EM','U','BR','P','UL','OL','LI','A','DIV','SPAN']);
+    function renderIdeaHtml(raw) {
+      if (!raw) return '';
+      // Legacy plain-text entries: no HTML tags at all → escape and preserve line breaks.
+      if (!/<[a-z][\s\S]*>/i.test(raw)) return escHtml(raw).replace(/\n/g, '<br>');
+      const tpl = document.createElement('template');
+      tpl.innerHTML = raw;
+      (function walk(node) {
+        const children = Array.from(node.childNodes);
+        for (const child of children) {
+          if (child.nodeType === 1) {
+            if (!ALLOWED_TAGS.has(child.tagName)) {
+              const text = document.createTextNode(child.textContent || '');
+              child.replaceWith(text);
+              continue;
+            }
+            for (const attr of Array.from(child.attributes)) {
+              if (child.tagName === 'A' && attr.name === 'href' && /^https?:/i.test(attr.value)) continue;
+              child.removeAttribute(attr.name);
+            }
+            if (child.tagName === 'A') { child.setAttribute('target', '_blank'); child.setAttribute('rel', 'noopener'); }
+            walk(child);
+          } else if (child.nodeType !== 3 && child.nodeType !== 8) {
+            child.remove();
+          }
+        }
+      })(tpl.content);
+      return tpl.innerHTML;
+    }
+    function formatTs(ts) {
+      if (!ts) return '';
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleDateString('en-SG', { day: 'numeric', month: 'short' }) + ', ' +
+        d.toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    const MOCK = null;
+
+    // ── Load all ──────────────────────────────────────────────────────────────
+
+    async function loadAll() {
+      await Promise.all([loadAdminTrackA(), loadAdminTrackB(), loadAdminTrackC()]);
+    }
+
+    // Resolve the effective assignee list for a module (sheet + overrides, minus deletions).
+    function getAssignees(sheetAssigned, override) {
+      if (!override) {
+        return sheetAssigned ? [sheetAssigned] : [];
+      }
+      // New shape: { added: string[], removed: string[] } — added via admin, removed from sheet list
+      if (typeof override === 'object' && (override.added || override.removed)) {
+        const base = sheetAssigned && !(override.removed || []).includes(sheetAssigned) ? [sheetAssigned] : [];
+        return [...base, ...(override.added || [])];
+      }
+      // Legacy shape: single string (overrides sheet entirely). Migrate mentally to array.
+      if (typeof override === 'string') return [override];
+      if (Array.isArray(override)) return override;
+      return sheetAssigned ? [sheetAssigned] : [];
+    }
+
+
+    // ── TRACK A ADMIN ─────────────────────────────────────────────────────────
+
+    async function loadAdminTrackA() {
+      const el = document.getElementById('trackAAdmin');
+      const sumEl = document.getElementById('trackASummary');
+
+      const rows = await fetchCSV(KB_SHEET_CSV_URL);
+
+      if (!rows) {
+        el.innerHTML = `<div class="empty-state">Module sheet not connected yet. Add the published CSV URL to admin.html config.</div>`;
+        return;
+      }
+
+      // Fetch volunteer records
+      const volSnap = await getDocs(collection(db, 'moduleVolunteers'));
+      const volunteers = {};
+      volSnap.forEach(d => {
+        const v = d.data();
+        if (!volunteers[v.moduleId]) volunteers[v.moduleId] = [];
+        volunteers[v.moduleId].push(v);
+      });
+
+      // Fetch admin overrides. Schema: { added: string[], removed: string[] } per module.
+      // Legacy records may have { assignedTo: string } — treat as { added: [assignedTo], removed: [] }.
+      const overrideSnap = await getDocs(collection(db, 'moduleAssignments'));
+      const overrides = {};
+      overrideSnap.forEach(d => {
+        const data = d.data();
+        if (data.added !== undefined || data.removed !== undefined) {
+          overrides[d.id] = { added: data.added || [], removed: data.removed || [] };
+        } else if (data.assignedTo) {
+          overrides[d.id] = { added: [data.assignedTo], removed: [] };
+        }
+      });
+
+      const modules = rows.slice(1).filter(r => r[3]);
+      const unassigned = modules.filter(r => {
+        const id = slugify(r[3]);
+        return getAssignees(r[6], overrides[id]).length === 0;
+      });
+      const total = modules.length;
+
+      sumEl.innerHTML = `
+        <div class="summary-chip"><strong>${total}</strong> modules total</div>
+        <div class="summary-chip ${unassigned.length ? 'warn' : ''}"><strong>${unassigned.length}</strong> unassigned</div>
+        <div class="summary-chip"><strong>${total - unassigned.length}</strong> assigned</div>`;
+
+      const allPeople = [...new Set(modules.flatMap(r => {
+        const id = slugify(r[3]);
+        return getAssignees(r[6], overrides[id]);
+      }).filter(Boolean))].sort();
+
+      let html = `
+        <div style="overflow-x:auto;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Product Line</th>
+              <th>Domain</th>
+              <th>Module</th>
+              <th>Status</th>
+              <th>Currently Assigned</th>
+              <th>Volunteers</th>
+              <th>Add assignee</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+      modules.forEach(r => {
+        const [prodLine, domain, subdomain, name, desc, status, sheetAssigned] = r;
+        const id = slugify(name);
+        const assignees = getAssignees(sheetAssigned, overrides[id]);
+        const vols = volunteers[id] || [];
+        const assignedSearchText = assignees.join(' ');
+
+        html += `
+          <tr data-module-row data-assigned-to="${escHtml(assignedSearchText)}" data-module-name="${escHtml(name)}">
+            <td>${prodLine ? `<span class="cell-tag">${escHtml(prodLine)}</span>` : '<span style="color:var(--muted);">—</span>'}</td>
+            <td>
+              ${domain ? `<span class="cell-tag">${escHtml(domain)}</span>` : ''}
+              ${subdomain ? `<div style="margin-top:3px;"><span class="cell-tag" style="background:#f0f4ff;">${escHtml(subdomain)}</span></div>` : ''}
+            </td>
+            <td style="min-width:220px;">
+              <div style="font-weight:700;color:var(--navy);font-size:0.9rem;">${escHtml(name)}</div>
+              ${desc ? `<div style="font-size:0.75rem;color:var(--muted);margin-top:3px;line-height:1.45;">${escHtml(desc)}</div>` : ''}
+            </td>
+            <td>${status ? escHtml(status) : '<span style="color:var(--muted);">—</span>'}</td>
+            <td>
+              ${assignees.length
+                ? assignees.map(a => `
+                    <div class="assignee-row">
+                      <span class="assigned-pill">${escHtml(a)}</span>
+                      <button class="btn-assignee-remove" title="Remove" onclick="removeAssignee('${id}', '${escHtml(name)}', ${JSON.stringify(a)})">&times;</button>
+                    </div>`).join('')
+                : `<span class="unassigned-pill">Unassigned</span>`}
+            </td>
+            <td>
+              ${vols.length
+                ? vols.map(v => `<span style="font-size:0.75rem;display:block;">${escHtml(v.displayName || v.email)}</span>`).join('')
+                : '<span style="font-size:0.75rem;color:var(--muted);">—</span>'}
+            </td>
+            <td>
+              <div style="display:flex;gap:0.4rem;align-items:center;">
+                <input type="text" class="assign-select" id="assignInput-${id}"
+                  placeholder="Name or email" list="peoplelist" style="min-width:140px;" />
+                <button class="btn-assign" onclick="addAssignee('${id}', '${escHtml(name)}')">Add</button>
+              </div>
+            </td>
+          </tr>`;
+      });
+
+      html += `</tbody></table></div>
+        <datalist id="peoplelist">
+          ${allPeople.map(p => `<option value="${escHtml(p)}">`).join('')}
+        </datalist>`;
+
+      el.innerHTML = html;
+
+      // Helper: merge local change into Firestore override doc for this module.
+      async function writeOverride(moduleId, moduleName, mutator) {
+        const ref = doc(db, 'moduleAssignments', moduleId);
+        const snap = await getDoc(ref);
+        let cur = { added: [], removed: [] };
+        if (snap.exists()) {
+          const d = snap.data();
+          if (d.added !== undefined || d.removed !== undefined) {
+            cur = { added: d.added || [], removed: d.removed || [] };
+          } else if (d.assignedTo) {
+            cur = { added: [d.assignedTo], removed: [] };
+          }
+        }
+        mutator(cur);
+        await setDoc(ref, {
+          moduleId,
+          moduleName,
+          added: cur.added,
+          removed: cur.removed,
+          updatedBy: currentUser.email,
+          updatedAt: serverTimestamp(),
+        });
+      }
+
+      window.addAssignee = async (moduleId, moduleName) => {
+        const val = document.getElementById('assignInput-' + moduleId).value.trim();
+        if (!val) { showToast('Enter a name or email to add.', 'error'); return; }
+        try {
+          await writeOverride(moduleId, moduleName, (cur) => {
+            cur.removed = cur.removed.filter(x => x !== val);
+            if (!cur.added.includes(val)) cur.added.push(val);
+          });
+          showToast('Assignee added.', 'success');
+          loadAdminTrackA();
+        } catch { showToast('Failed to save.', 'error'); }
+      };
+
+      window.removeAssignee = async (moduleId, moduleName, name) => {
+        try {
+          await writeOverride(moduleId, moduleName, (cur) => {
+            if (cur.added.includes(name)) {
+              cur.added = cur.added.filter(x => x !== name);
+            } else {
+              if (!cur.removed.includes(name)) cur.removed.push(name);
+            }
+          });
+          showToast('Assignee removed.', 'success');
+          loadAdminTrackA();
+        } catch { showToast('Failed to remove.', 'error'); }
+      };
+    }
+
+    // ── TRACK B ADMIN ─────────────────────────────────────────────────────────
+
+    async function loadAdminTrackB() {
+      const el = document.getElementById('trackBAdmin');
+      const sumEl = document.getElementById('trackBSummary');
+
+      // Fetch all Track B plans
+      const plansSnap = await getDocs(query(collection(db, 'trackBPlans'), orderBy('createdAt', 'desc')));
+      const plansByPerson = {};
+      plansSnap.forEach(d => {
+        const data = { id: d.id, ...d.data() };
+        const key = data.email;
+        if (!plansByPerson[key]) plansByPerson[key] = { email: key, name: data.displayName || key, plans: [] };
+        plansByPerson[key].plans.push(data);
+      });
+
+      // Fetch all tools from sheet to get names
+      const toolRows = await fetchCSV(TOOLS_SHEET_CSV_URL);
+      const toolNames = {};
+      if (toolRows) toolRows.slice(1).filter(r => (r[5]||'').toUpperCase()==='TRUE' && r[0]).forEach(r => {
+        toolNames[slugify(r[0])] = r[0];
+      });
+
+      // Fetch existing feedback
+      const fbSnap = await getDocs(collection(db, 'trackBFeedback'));
+      const feedbackByPlan = {};
+      fbSnap.forEach(d => { feedbackByPlan[d.data().planId] = { id: d.id, ...d.data() }; });
+
+      const people = Object.values(plansByPerson);
+      const withPlans = people.filter(p => p.plans.length > 0);
+
+      sumEl.innerHTML = `
+        <div class="summary-chip"><strong>${withPlans.length}</strong> people with plans</div>
+        <div class="summary-chip"><strong>${plansSnap.size}</strong> plans total</div>
+        <div class="summary-chip"><strong>${Object.keys(feedbackByPlan).length}</strong> with feedback</div>`;
+
+      if (!withPlans.length) {
+        el.innerHTML = '<div class="empty-state">No Track B plans submitted yet.</div>';
+        return;
+      }
+
+      let html = '<div class="review-grid">';
+      withPlans.forEach(person => {
+        const planCount = person.plans.length;
+        const fbCount = person.plans.filter(p => feedbackByPlan[p.id]).length;
+
+        const toolsList = person.plans.map(p => toolNames[p.toolId] || p.toolId).join(' ');
+        html += `
+          <div class="review-card" id="rc-b-${slugify(person.email)}"
+            data-review-card data-track="B"
+            data-person="${escHtml(person.name + ' ' + person.email)}"
+            data-builders="${escHtml(person.name + ' ' + person.email)}"
+            data-tools="${escHtml(toolsList)}">
+            <div class="review-card-header" onclick="toggleCard('rc-b-${slugify(person.email)}')">
+              <div class="review-header-left">
+                <div class="review-person">${escHtml(person.name)}</div>
+                <div class="review-meta">${escHtml(person.email)} &middot; ${planCount} plan${planCount>1?'s':''}</div>
+              </div>
+              <span class="review-count ${planCount > 0 ? 'has-plans' : 'no-plans'}">${fbCount}/${planCount} reviewed</span>
+              <span class="chevron">&#9660;</span>
+            </div>
+            <div class="review-card-body">`;
+
+        person.plans.forEach(plan => {
+          const toolName = toolNames[plan.toolId] || plan.toolId;
+          const existingFb = feedbackByPlan[plan.id];
+          html += `
+            <div class="plan-review-item">
+              <div class="plan-review-header">
+                <div class="plan-ref">Tool: ${escHtml(toolName)}</div>
+                <div class="plan-ts">${formatTs(plan.createdAt)}</div>
+              </div>
+              <div class="plan-text">${escHtml(plan.text)}</div>
+              ${existingFb ? `
+                <div class="existing-feedback">
+                  <div class="fb-label">Your feedback</div>
+                  <div class="fb-text">${escHtml(existingFb.text)}</div>
+                </div>` : ''}
+              <div class="feedback-area">
+                <label>${existingFb ? 'Update feedback' : 'Add feedback'}</label>
+                <textarea id="fb-b-${plan.id}" placeholder="Leave feedback for ${escHtml(person.name)}...">${existingFb ? escHtml(existingFb.text) : ''}</textarea>
+                <div class="feedback-actions">
+                  <button class="btn-save-fb" onclick="saveBFeedback('${plan.id}', '${person.email}', '${existingFb ? existingFb.id : ''}')">Save feedback</button>
+                </div>
+              </div>
+            </div>`;
+        });
+
+        html += `</div></div>`;
+      });
+      html += '</div>';
+
+      el.innerHTML = html;
+
+      window.saveBFeedback = async (planId, participantEmail, existingFbId) => {
+        const text = document.getElementById('fb-b-' + planId).value.trim();
+        if (!text) { showToast('Feedback cannot be empty.', 'error'); return; }
+        try {
+          const fbData = { planId, participantEmail, text, adminEmail: currentUser.email, updatedAt: serverTimestamp() };
+          if (existingFbId) {
+            await updateDoc(doc(db, 'trackBFeedback', existingFbId), fbData);
+          } else {
+            await addDoc(collection(db, 'trackBFeedback'), { ...fbData, createdAt: serverTimestamp() });
+          }
+          showToast('Feedback saved.', 'success');
+          loadAdminTrackB();
+        } catch { showToast('Failed to save.', 'error'); }
+      };
+    }
+
+    // ── TRACK C ADMIN ─────────────────────────────────────────────────────────
+
+    const TRACK_C_CATEGORIES = [
+      'Problem Discovery',
+      'FRF Drafting',
+      'BRD Review and Sign-off',
+      'UAT',
+      'Feature Education and Rollout',
+      'Miscellaneous',
+    ];
+
+    async function loadAdminTrackC() {
+      const el = document.getElementById('trackCAdmin');
+      const sumEl = document.getElementById('trackCSummary');
+
+      const [ideasSnap, volSnap, upvoteSnap, buildPlansSnap, fbSnap] = await Promise.all([
+        getDocs(query(collection(db, 'trackCIdeas'), orderBy('createdAt', 'desc'))),
+        getDocs(collection(db, 'trackCVolunteers')),
+        getDocs(collection(db, 'trackCUpvotes')),
+        getDocs(query(collection(db, 'trackCBuildPlans'), orderBy('createdAt', 'desc'))),
+        getDocs(collection(db, 'trackCBuildFeedback')),
+      ]);
+
+      const ideas = [];
+      ideasSnap.forEach(d => ideas.push({ id: d.id, ...d.data() }));
+
+      const volByIdea = {};
+      volSnap.forEach(d => {
+        const v = d.data();
+        if (!volByIdea[v.ideaId]) volByIdea[v.ideaId] = [];
+        volByIdea[v.ideaId].push(v);
+      });
+
+      const upvotesByIdea = {};
+      upvoteSnap.forEach(d => {
+        const v = d.data();
+        upvotesByIdea[v.ideaId] = (upvotesByIdea[v.ideaId] || 0) + 1;
+      });
+
+      const buildPlansByIdea = {};
+      buildPlansSnap.forEach(d => {
+        const data = { id: d.id, ...d.data() };
+        if (!buildPlansByIdea[data.ideaId]) buildPlansByIdea[data.ideaId] = [];
+        buildPlansByIdea[data.ideaId].push(data);
+      });
+
+      const feedbackByPlan = {};
+      fbSnap.forEach(d => { feedbackByPlan[d.data().planId] = { id: d.id, ...d.data() }; });
+
+      const noBuilder = ideas.filter(i => !(volByIdea[i.id]||[]).some(v => v.role === 'build'));
+      const noTester = ideas.filter(i => !(volByIdea[i.id]||[]).some(v => v.role === 'test'));
+      const totalPlans = buildPlansSnap.size;
+      const totalFb = fbSnap.size;
+
+      sumEl.innerHTML = `
+        <div class="summary-chip"><strong>${ideas.length}</strong> ideas</div>
+        <div class="summary-chip ${noBuilder.length ? 'warn' : ''}"><strong>${noBuilder.length}</strong> no builder</div>
+        <div class="summary-chip ${noTester.length ? 'warn' : ''}"><strong>${noTester.length}</strong> no tester</div>
+        <div class="summary-chip"><strong>${totalPlans}</strong> build plans &middot; <strong>${totalFb}</strong> reviewed</div>`;
+
+      if (!ideas.length) {
+        el.innerHTML = '<div class="empty-state">No Track C ideas submitted yet.</div>';
+        return;
+      }
+
+      // Group by category, sort by upvotes descending within each
+      const ideasByCategory = {};
+      TRACK_C_CATEGORIES.forEach(cat => { ideasByCategory[cat] = []; });
+      ideas.forEach(idea => {
+        const cat = idea.category || 'Miscellaneous';
+        if (!ideasByCategory[cat]) ideasByCategory[cat] = [];
+        ideasByCategory[cat].push(idea);
+      });
+      TRACK_C_CATEGORIES.forEach(cat => {
+        ideasByCategory[cat].sort((a, b) => (upvotesByIdea[b.id] || 0) - (upvotesByIdea[a.id] || 0));
+      });
+
+      const catSlug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+      function renderIdeaCard(idea) {
+        const vols = volByIdea[idea.id] || [];
+        const builders = vols.filter(v => v.role === 'build');
+        const testers = vols.filter(v => v.role === 'test');
+        const hasBuilder = builders.length > 0;
+        const hasTester = testers.length > 0;
+        const upvotes = upvotesByIdea[idea.id] || 0;
+        const plans = buildPlansByIdea[idea.id] || [];
+        const reviewedPlans = plans.filter(p => feedbackByPlan[p.id]).length;
+
+        // Map builder email → unreviewed-plan status.
+        // unreviewed: at least one plan exists for this builder without feedback.
+        const builderPlanStatus = {};
+        plans.forEach(p => {
+          const reviewed = !!feedbackByPlan[p.id];
+          if (!builderPlanStatus[p.email]) builderPlanStatus[p.email] = { hasPlan: false, unreviewed: false };
+          builderPlanStatus[p.email].hasPlan = true;
+          if (!reviewed) builderPlanStatus[p.email].unreviewed = true;
+        });
+
+        const builderSearchText = builders.map(b => (b.displayName || '') + ' ' + (b.email || '')).join(' ');
+
+        return `
+          <div class="review-card" id="rc-c-${idea.id}"
+            data-review-card data-track="C"
+            data-person="${escHtml(builderSearchText)}"
+            data-no-builder="${!hasBuilder}"
+            data-no-tester="${!hasTester}">
+            <div class="review-card-header" onclick="toggleCard('rc-c-${idea.id}')">
+              <div class="review-header-left">
+                <div class="review-idea-full">${renderIdeaHtml(idea.text)}</div>
+                <div class="review-meta">
+                  Submitted by ${escHtml(idea.displayName || idea.email)}${upvotes ? ` &middot; &#9650; ${upvotes}` : ''}
+                </div>
+              </div>
+              ${(hasBuilder || hasTester) ? `
+              <div class="role-stub">
+                ${hasBuilder ? `
+                  <div class="role-stub-section">
+                    <div class="role-stub-label role-build">Building</div>
+                    ${builders.map(b => {
+                      const st = builderPlanStatus[b.email] || { hasPlan: false, unreviewed: false };
+                      return `<div class="role-stub-name ${st.unreviewed ? 'unreviewed' : ''}">
+                        ${escHtml(b.displayName || b.email)}
+                        ${st.unreviewed ? '<span class="plan-dot" title="Build plan awaiting review">&#9679;</span>' : ''}
+                      </div>`;
+                    }).join('')}
+                  </div>` : ''}
+                ${hasTester ? `
+                  <div class="role-stub-section">
+                    <div class="role-stub-label role-test">Testing</div>
+                    ${testers.map(t => `<div class="role-stub-name">${escHtml(t.displayName || t.email)}</div>`).join('')}
+                  </div>` : ''}
+              </div>` : ''}
+              <div style="display:flex;flex-direction:column;gap:0.3rem;align-items:flex-end;flex-shrink:0;">
+                ${plans.length ? `<span class="review-count ${reviewedPlans === plans.length ? 'all-reviewed' : 'has-plans'}">${reviewedPlans}/${plans.length} plan${plans.length !== 1 ? 's' : ''} reviewed</span>` : ''}
+                ${!hasBuilder ? '<span class="unassigned-pill">No builder</span>' : ''}
+                ${!hasTester ? '<span class="unassigned-pill">No tester</span>' : ''}
+              </div>
+              <span class="chevron">&#9660;</span>
+            </div>
+            <div class="review-card-body">
+              ${plans.length ? `
+                <div style="margin-top:0.85rem;padding-top:0.85rem;border-top:1px solid var(--border);">
+                  <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:0.6rem;">Build plans</div>
+                  ${plans.map(plan => {
+                    const existingFb = feedbackByPlan[plan.id];
+                    return `
+                      <div class="plan-review-item">
+                        <div class="plan-review-header">
+                          <div class="plan-ref">By ${escHtml(plan.displayName || plan.email)}</div>
+                          <div class="plan-ts">${formatTs(plan.createdAt)}</div>
+                        </div>
+                        <div class="plan-text">${escHtml(plan.text)}</div>
+                        ${existingFb ? `
+                          <div class="existing-feedback">
+                            <div class="fb-label">Your feedback</div>
+                            <div class="fb-text">${escHtml(existingFb.text)}</div>
+                          </div>` : ''}
+                        <div class="feedback-area">
+                          <label>${existingFb ? 'Update feedback' : 'Add feedback'}</label>
+                          <textarea id="fb-cp-${plan.id}" placeholder="Leave feedback for ${escHtml(plan.displayName||plan.email)}...">${existingFb ? escHtml(existingFb.text) : ''}</textarea>
+                          <div class="feedback-actions">
+                            <button class="btn-save-fb" onclick="saveCBuildFeedback('${plan.id}', '${escHtml(plan.email)}', '${existingFb ? existingFb.id : ''}')">Save feedback</button>
+                          </div>
+                        </div>
+                      </div>`;
+                  }).join('')}
+                </div>` : '<div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem;">No build plans submitted yet.</div>'}
+            </div>
+          </div>`;
+      }
+
+      let html = '';
+      TRACK_C_CATEGORIES.forEach(cat => {
+        const catIdeas = ideasByCategory[cat] || [];
+        const slug = catSlug(cat);
+        const hasIdeas = catIdeas.length > 0;
+        html += `
+          <div style="margin-bottom:0.75rem;background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;" id="adm-cat-${slug}">
+            <div onclick="toggleAdminCat('${slug}')" style="display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.1rem;cursor:pointer;user-select:none;">
+              <div style="display:flex;align-items:center;gap:0.65rem;">
+                <span style="font-size:0.9rem;font-weight:700;color:var(--navy);">${escHtml(cat)}</span>
+                <span style="font-size:0.72rem;font-weight:600;padding:2px 7px;border-radius:10px;background:${hasIdeas ? '#fff3f0' : 'var(--bg)'};color:${hasIdeas ? 'var(--orange)' : 'var(--muted)'};">${catIdeas.length} idea${catIdeas.length !== 1 ? 's' : ''}</span>
+              </div>
+              <span style="font-size:0.8rem;color:var(--muted);transition:transform 0.2s;" id="adm-cat-chevron-${slug}">${hasIdeas ? '&#9660;' : '&#9654;'}</span>
+            </div>
+            <div id="adm-cat-body-${slug}" style="display:${hasIdeas ? 'block' : 'none'};padding:0 1rem 1rem;">
+              ${catIdeas.length === 0
+                ? `<div style="font-size:0.83rem;color:var(--muted);padding:0.5rem 0;">No ideas in this category yet.</div>`
+                : catIdeas.map(renderIdeaCard).join('')
+              }
+            </div>
+          </div>`;
+      });
+
+      el.innerHTML = html;
+
+      window.toggleAdminCat = (slug) => {
+        const body = document.getElementById('adm-cat-body-' + slug);
+        const chev = document.getElementById('adm-cat-chevron-' + slug);
+        const open = body.style.display !== 'none';
+        body.style.display = open ? 'none' : 'block';
+        chev.innerHTML = open ? '&#9654;' : '&#9660;';
+      };
+
+      window.saveCBuildFeedback = async (planId, participantEmail, existingFbId) => {
+        const text = document.getElementById('fb-cp-' + planId).value.trim();
+        if (!text) { showToast('Feedback cannot be empty.', 'error'); return; }
+        try {
+          const fbData = { planId, participantEmail, text, adminEmail: currentUser.email, updatedAt: serverTimestamp() };
+          if (existingFbId) {
+            await updateDoc(doc(db, 'trackCBuildFeedback', existingFbId), fbData);
+          } else {
+            await addDoc(collection(db, 'trackCBuildFeedback'), { ...fbData, createdAt: serverTimestamp() });
+          }
+          showToast('Feedback saved.', 'success');
+          loadAdminTrackC();
+        } catch { showToast('Failed to save.', 'error'); }
+      };
+    }
+
+    // ── Shared ────────────────────────────────────────────────────────────────
+
+    window.toggleCard = (id) => {
+      document.getElementById(id).classList.toggle('open');
+    };
+  </script>
+
+</body>
+</html>

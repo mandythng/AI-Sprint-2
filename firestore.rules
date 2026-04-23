@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email in [
+        'amanda.thng@shopee.com',
+        'winarsita.sotyaji@shopee.com',
+        'stella.simsx@shopee.com',
+        'clarence.chngkh@shopee.com',
+        'yeanhuar.lee@shopee.com',
+        'wayne.sim@shopee.com',
+        'evelyn.lowyl@shopee.com',
+        'sarah.pan@shopee.com',
+        'qingwei.chua@shopee.com',
+        'nicholas.chanck@shopee.com',
+        'gerald.yip@shopee.com',
+        'shengwu.peh@shopee.com',
+        'shiliang.neoh@shopee.com',
+        'huifang.liu@shopee.com'
+      ];
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(email) {
+      return request.auth.token.email == email;
+    }
+
+    // Track B plans — participants write their own, admins read all
+    match /trackBPlans/{docId} {
+      allow read: if isAdmin() || (isSignedIn() && isOwner(resource.data.email));
+      allow create: if isSignedIn() && isOwner(request.resource.data.email);
+      allow update: if isAdmin() || (isSignedIn() && isOwner(resource.data.email));
+      allow delete: if false;
+    }
+
+    // Track B feedback — admins write, owners can read their own
+    match /trackBFeedback/{docId} {
+      allow read: if isAdmin() || (isSignedIn() && isOwner(resource.data.email));
+      allow write: if isAdmin();
+    }
+
+    // Track C ideas — all signed-in can read, participants write their own
+    match /trackCIdeas/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isOwner(request.resource.data.email);
+      allow update: if isAdmin() || (isSignedIn() && isOwner(resource.data.email));
+      allow delete: if isAdmin() || (isSignedIn() && isOwner(resource.data.email));
+    }
+
+    // Track C upvotes — doc ID is ideaId_email; enforce email ownership
+    match /trackCUpvotes/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isOwner(request.resource.data.email);
+      allow delete: if isSignedIn() && isOwner(resource.data.email);
+      allow update: if false;
+    }
+
+    // Track C volunteers
+    match /trackCVolunteers/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isOwner(request.resource.data.email);
+      allow update: if isAdmin() || (isSignedIn() && isOwner(resource.data.email));
+      allow delete: if isSignedIn() && isOwner(resource.data.email);
+    }
+
+    // Track C build plans — participants write their own, admins read all
+    match /trackCBuildPlans/{docId} {
+      allow read: if isAdmin() || (isSignedIn() && isOwner(resource.data.email));
+      allow create: if isSignedIn() && isOwner(request.resource.data.email);
+      allow update: if isAdmin() || (isSignedIn() && isOwner(resource.data.email));
+      allow delete: if false;
+    }
+
+    // Track C build feedback — admins write, owners read their own
+    match /trackCBuildFeedback/{docId} {
+      allow read: if isAdmin() || (isSignedIn() && isOwner(resource.data.email));
+      allow write: if isAdmin();
+    }
+
+    // Module volunteers — all signed-in read, participants write their own
+    match /moduleVolunteers/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isOwner(request.resource.data.email);
+      allow update: if isAdmin() || (isSignedIn() && isOwner(resource.data.email));
+      allow delete: if isSignedIn() && isOwner(resource.data.email);
+    }
+
+    // Module assignments — admins write, all signed-in read
+    match /moduleAssignments/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

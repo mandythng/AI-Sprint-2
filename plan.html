@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Sprint Plan | AI Sprint 2</title>
+  <style>
+    :root {
+      --orange: #EE4D2D;
+      --navy: #113366;
+      --navy-light: #1a4a8a;
+      --bg: #f7f7f7;
+      --white: #ffffff;
+      --text: #222222;
+      --muted: #666666;
+      --border: #e0e0e0;
+      --green: #1a8a4a;
+      --green-bg: #f0faf4;
+      --green-border: #b3dfc5;
+      --red: #cc2200;
+      --red-bg: #fff5f3;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      background: var(--navy);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo { color: var(--white); font-weight: 700; font-size: 1rem; }
+    .nav-logo span { color: var(--orange); }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--white); }
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(255,255,255,0.85);
+      font-size: 0.8rem;
+    }
+    .nav-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    .nav-avatar-initials { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.25); color: #fff; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .nav-signout {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    .nav-signout:hover { color: rgba(255,255,255,0.85); }
+
+    /* AUTH GATE */
+    .auth-gate {
+      min-height: calc(100vh - 56px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .auth-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+    .auth-card .lock-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .auth-card h2 { font-size: 1.3rem; font-weight: 800; color: var(--navy); margin-bottom: 0.5rem; }
+    .auth-card p { font-size: 0.875rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .btn-google {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--white);
+      border: 2px solid var(--border);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+    }
+    .btn-google:hover { border-color: var(--navy); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn-google svg { flex-shrink: 0; }
+
+    /* MAIN LAYOUT */
+    .main-content { display: none; }
+    .page-header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+      color: var(--white);
+      padding: 2.5rem 2rem 2rem;
+    }
+    .page-header-inner { max-width: 900px; margin: 0 auto; }
+    .page-header-eyebrow {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 0.5rem;
+    }
+    .page-header h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .page-header-sub { font-size: 0.9rem; color: rgba(255,255,255,0.7); }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 2rem;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--navy); border-bottom-color: var(--orange); }
+    .tab-badge {
+      background: var(--orange);
+      color: var(--white);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 10px;
+    }
+    .tab-badge.required { background: var(--orange); }
+    .tab-badge.choose { background: var(--navy); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* SECTION LABELS */
+    .section-eyebrow {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--orange);
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .section-title { font-size: 1.2rem; font-weight: 800; color: var(--navy); margin-bottom: 0.4rem; }
+    .section-desc { font-size: 0.875rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+    /* MODULE CARDS */
+    .module-grid { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .module-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .module-card.assigned {
+      border-color: var(--orange);
+      background: #fff8f7;
+    }
+    .module-card.assigned-other {
+      opacity: 0.7;
+    }
+    .module-card-left { flex: 1; min-width: 0; }
+    .module-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.25rem;
+    }
+    .module-tag {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #eef0f5;
+      color: var(--navy);
+    }
+    .module-name { font-size: 0.92rem; font-weight: 700; color: var(--navy); margin-bottom: 0.15rem; }
+    .module-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+    .module-assignee { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+    .module-assignee strong { color: var(--text); }
+
+    .module-card-right { flex-shrink: 0; }
+    .status-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .status-assigned-me { background: #fff3f0; color: var(--orange); border: 1px solid var(--orange); }
+    .status-assigned-other { background: #f0f0f0; color: var(--muted); border: 1px solid var(--border); }
+    .status-unassigned { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+
+    .btn-volunteer {
+      display: inline-block;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .btn-volunteer:hover { opacity: 0.85; }
+    .btn-volunteer:disabled { opacity: 0.4; cursor: default; }
+
+    /* PLACEHOLDER STATE */
+    .placeholder-state {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.5rem;
+      text-align: center;
+    }
+    .placeholder-state .placeholder-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .placeholder-state h3 { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem; }
+    .placeholder-state p { font-size: 0.85rem; color: var(--muted); max-width: 380px; margin: 0 auto; }
+
+    /* TRACK B TOOLS */
+    .tool-grid { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; }
+    .tool-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .tool-card-header {
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tool-card-header:hover { background: #fafafa; }
+    .tool-header-left { flex: 1; min-width: 0; }
+    .tool-name { font-size: 0.92rem; font-weight: 700; color: var(--navy); }
+    .tool-meta { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+    .tool-meta span { margin-right: 0.75rem; }
+    .tool-card-header .chevron {
+      font-size: 0.8rem;
+      color: var(--muted);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    .tool-card.open .chevron { transform: rotate(180deg); }
+    .tool-card.open .tool-card-header { background: #fafafa; }
+
+    .tool-card-body { display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--border); }
+    .tool-card.open .tool-card-body { display: block; }
+
+    .tool-description {
+      font-size: 0.83rem;
+      color: var(--muted);
+      margin: 0.85rem 0;
+      line-height: 1.55;
+    }
+    .tool-link-row { margin-bottom: 1rem; }
+    .tool-link-row a { font-size: 0.8rem; color: var(--orange); font-weight: 600; text-decoration: none; }
+    .tool-link-row a:hover { text-decoration: underline; }
+
+    /* PLAN SUBMISSIONS */
+    .submissions-section { margin-top: 1rem; }
+    .submissions-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .submission-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+    .submission-item.has-feedback { border-color: var(--orange); }
+    .submission-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .submission-ts { font-size: 0.72rem; color: var(--muted); }
+    .submission-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+    .btn-sm {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      cursor: pointer;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .btn-sm:hover { border-color: var(--navy); color: var(--navy); }
+    .btn-sm.danger:hover { border-color: var(--red); color: var(--red); }
+    .submission-text { font-size: 0.83rem; color: var(--text); line-height: 1.55; white-space: pre-wrap; }
+    .feedback-block {
+      margin-top: 0.6rem;
+      padding: 0.6rem 0.85rem;
+      background: #fff8f7;
+      border: 1px solid #f5c4ba;
+      border-radius: 6px;
+    }
+    .feedback-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--orange); margin-bottom: 0.2rem; }
+    .feedback-text { font-size: 0.8rem; color: var(--text); line-height: 1.5; }
+
+    .add-plan-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      border: 1.5px dashed var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 1rem;
+      font-size: 0.83rem;
+      color: var(--muted);
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+    .add-plan-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+    /* PLAN EDITOR */
+    .plan-editor {
+      background: var(--white);
+      border: 1px solid var(--orange);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .plan-editor textarea {
+      width: 100%;
+      min-height: 100px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+      color: var(--text);
+      resize: vertical;
+      line-height: 1.55;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .plan-editor textarea:focus { border-color: var(--orange); }
+    .plan-editor-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .btn-cancel {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-cancel:hover { border-color: var(--text); color: var(--text); }
+    .btn-save {
+      background: var(--orange);
+      border: none;
+      color: var(--white);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-save:hover { opacity: 0.88; }
+
+    /* TRACK C */
+    .ideas-section { margin-top: 0; }
+    .idea-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .idea-card.mine { border-color: var(--orange); }
+    .idea-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .idea-author { font-size: 0.75rem; color: var(--muted); }
+    .idea-author strong { color: var(--text); }
+    .idea-text { font-size: 0.875rem; color: var(--text); line-height: 1.6; white-space: pre-wrap; }
+    .idea-footer {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .volunteer-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 5px;
+      background: #f0f4ff;
+      color: var(--navy);
+      border: 1px solid #c5d3f0;
+    }
+    .volunteer-tag.me { background: #fff3f0; color: var(--orange); border-color: #f5c4ba; }
+    .btn-volunteer-sm {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      border: 1.5px solid var(--navy);
+      color: var(--navy);
+      background: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-volunteer-sm:hover { background: var(--navy); color: var(--white); }
+    .btn-volunteer-sm.active { background: var(--navy); color: var(--white); }
+    .btn-upvote {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.28rem 0.65rem;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      background: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-upvote:hover { border-color: var(--orange); color: var(--orange); }
+    .btn-upvote.active { border-color: var(--orange); color: var(--orange); background: #fff3f0; }
+    .idea-build-plans {
+      margin-top: 0.85rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+    .idea-build-plans-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--navy);
+      margin-bottom: 0.5rem;
+    }
+
+    .new-idea-section {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .new-idea-section h3 { font-size: 0.92rem; font-weight: 700; color: var(--navy); margin-bottom: 0.25rem; }
+    .new-idea-section p { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.75rem; }
+
+    .rich-editor-wrap { position: relative; }
+    .rich-editor {
+      width: 100%;
+      min-height: 120px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      font-family: inherit;
+      color: var(--text);
+      resize: vertical;
+      line-height: 1.6;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .rich-editor:focus { border-color: var(--orange); }
+
+    /* Rich text editor (contenteditable) */
+    .rte-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--white); transition: border-color 0.2s; }
+    .rte-wrap:focus-within { border-color: var(--orange); }
+    .rte-toolbar { display: flex; gap: 0.25rem; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); background: #fafafa; }
+    .rte-btn {
+      background: none; border: 1px solid transparent; border-radius: 4px;
+      padding: 0.2rem 0.55rem; font-size: 0.8rem; font-weight: 600;
+      color: var(--muted); cursor: pointer; transition: all 0.15s; font-family: inherit;
+    }
+    .rte-btn:hover { background: var(--white); border-color: var(--border); color: var(--text); }
+    .rte-btn.active { background: #fff3f0; color: var(--orange); border-color: #f5c4ba; }
+    .rte-btn b { font-weight: 800; }
+    .rte-btn i { font-style: italic; }
+    .rte-btn u { text-decoration: underline; }
+    .rte-content {
+      min-height: 120px; padding: 0.75rem 1rem; outline: none;
+      font-size: 0.875rem; line-height: 1.6; color: var(--text);
+    }
+    .rte-content:empty:before { content: attr(data-placeholder); color: #999; }
+    .rte-content p { margin: 0 0 0.5rem 0; }
+    .rte-content p:last-child { margin-bottom: 0; }
+    .rte-content ul, .rte-content ol { margin: 0.25rem 0 0.5rem 1.5rem; }
+    .rte-content li { margin-bottom: 0.2rem; }
+
+    /* Rich text display (in idea cards) */
+    .rich-text-display { }
+    .rich-text-display p { margin: 0 0 0.5rem 0; }
+    .rich-text-display p:last-child { margin-bottom: 0; }
+    .rich-text-display ul, .rich-text-display ol { margin: 0.25rem 0 0.5rem 1.5rem; }
+    .rich-text-display li { margin-bottom: 0.2rem; }
+    .rich-text-display a { color: var(--orange); }
+
+    .btn-primary {
+      display: inline-block;
+      background: var(--orange);
+      color: var(--white);
+      font-weight: 700;
+      font-size: 0.875rem;
+      padding: 0.55rem 1.25rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+
+    /* LOADING / ERROR */
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem;
+      gap: 0.75rem;
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+    .spinner {
+      width: 28px; height: 28px;
+      border: 3px solid var(--border);
+      border-top-color: var(--orange);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.65rem 1.1rem;
+      border-radius: 8px;
+      z-index: 999;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: var(--green); }
+    .toast.error { background: var(--red); }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 640px) {
+      .tabs { overflow-x: auto; white-space: nowrap; }
+      .tab-btn { padding: 0.65rem 0.85rem; font-size: 0.8rem; }
+    }
+
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 500;
+    }
+    .modal-box {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 1.75rem;
+      max-width: 360px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+    .modal-box h3 { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem; }
+    .modal-box p { font-size: 0.875rem; color: var(--muted); margin-bottom: 1.25rem; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+    .btn-modal-cancel {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.85rem; font-weight: 600; padding: 0.45rem 1rem;
+      border-radius: 7px; cursor: pointer;
+    }
+    .btn-modal-cancel:hover { border-color: var(--text); color: var(--text); }
+    .btn-modal-delete {
+      background: var(--red); border: none; color: var(--white);
+      font-size: 0.85rem; font-weight: 700; padding: 0.45rem 1rem;
+      border-radius: 7px; cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-modal-delete:hover { opacity: 0.88; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">AI Sprint <span>2</span></div>
+    <div class="nav-links">
+      <a href="index.html">Briefing</a>
+      <a href="plan.html" class="active">My Plan</a>
+      <div class="nav-user" id="navUser" style="display:none;">
+        <img class="nav-avatar" id="navAvatar" src="" alt="" style="display:none;" onerror="this.style.display='none';document.getElementById('navAvatarInitials').style.display='flex';" />
+        <span class="nav-avatar-initials" id="navAvatarInitials" style="display:none;"></span>
+        <span id="navName"></span>
+        <button class="nav-signout" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- AUTH GATE -->
+  <div class="auth-gate" id="authGate">
+    <div class="auth-card">
+      <div class="lock-icon">🔒</div>
+      <h2>Sign in to view your plan</h2>
+      <p>Use your Shopee Google account to access your sprint plan, module assignments, and submission forms.</p>
+      <button class="btn-google" onclick="signInWithGoogle()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58Z" fill="#EA4335"/>
+        </svg>
+        Sign in with Google
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT (shown after auth) -->
+  <div class="main-content" id="mainContent">
+
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div class="page-header-eyebrow">Sprint 2 — Individual Plan</div>
+        <h1 id="pageTitle">My Sprint Plan</h1>
+        <div class="page-header-sub">Submit your plans by 29 Apr. Your RM and Amanda will review them before sprint day.</div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('trackA', this)">
+          Track A <span class="tab-badge required">Required</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('trackB', this)">
+          Track B <span class="tab-badge choose">Choose one</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('trackC', this)">
+          Track C <span class="tab-badge choose">Choose one</span>
+        </button>
+      </div>
+
+      <!-- TRACK A -->
+      <div class="tab-panel active" id="tab-trackA">
+        <div class="section-eyebrow">Track A — Required for all</div>
+        <div class="section-title">KB Documentation</div>
+        <div class="section-desc">Build knowledge bases for the department repository. You will be assigned a module to document; you can also volunteer for unassigned modules.</div>
+
+        <div id="trackAContent">
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            <span>Loading modules...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRACK B -->
+      <div class="tab-panel" id="tab-trackB">
+        <div class="section-eyebrow">Track B — Choose one</div>
+        <div class="section-title">Improve Existing Builds</div>
+        <div class="section-desc">Browse Sprint 1 tools that you built and submit your enhancement plan. Your RM will give you feedback before sprint day. If you do not see your builds listed here, this is a bug — please contact Amanda to rectify.</div>
+
+        <div id="trackBContent">
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            <span>Loading Sprint 1 tools...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRACK C -->
+      <div class="tab-panel" id="tab-trackC">
+        <div class="section-eyebrow">Track C — Choose one</div>
+        <div class="section-title">New Tools for Local Teams</div>
+        <div class="section-desc">Propose a new AI tool idea for local product team workflows, or volunteer to build or test someone else's idea.</div>
+
+        <div id="trackCContent">
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            <span>Loading ideas...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Regional Supply Chain Product &middot; AI Sprint 2 &middot; May 2026</footer>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="modal-overlay" id="confirmModal" style="display:none;">
+    <div class="modal-box">
+      <h3>Delete idea</h3>
+      <p>Are you sure you want to delete this idea?</p>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" onclick="closeConfirmModal()">Cancel</button>
+        <button class="btn-modal-delete" id="confirmModalDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Set to true to enforce login on this page
+    window.AUTH_ENABLED = true;
+  </script>
+  <script type="module">
+    const AUTH_ENABLED = window.AUTH_ENABLED;
+    let initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, fbSignOut, onAuthStateChanged;
+    let getFirestore, collection, doc, addDoc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, onSnapshot;
+
+    if (AUTH_ENABLED) {
+      ({ initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'));
+      ({ getAuth, GoogleAuthProvider, signInWithPopup, signOut: fbSignOut, onAuthStateChanged }
+        = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js'));
+      ({ getFirestore, collection, doc, addDoc, getDocs, getDoc, setDoc, updateDoc, deleteDoc,
+        query, where, orderBy, serverTimestamp, onSnapshot }
+        = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'));
+    }
+
+    // ─── CONFIG — replace with your Firebase project values ───────────────────
+    const firebaseConfig = {
+      apiKey: "AIzaSyAs4RlHjZ7P4MPeDf5u7ka60sDTt0O6z4k",
+      authDomain: "bpm-ai-sprint2.firebaseapp.com",
+      projectId: "bpm-ai-sprint2",
+      storageBucket: "bpm-ai-sprint2.firebasestorage.app",
+      messagingSenderId: "1016418343117",
+      appId: "1:1016418343117:web:967008a66a871c265ab184"
+    };
+
+    // Google Sheet IDs (published as CSV)
+    // Track A: module list (Tab "Modules")
+    // Format: Product Line / Domain / Subdomain / Module Name / Description / Status / Assigned To / Link
+    const KB_SHEET_CSV_URL = "REPLACE_WITH_MODULES_SHEET_PUBLISHED_CSV_URL";
+
+    // Track B: Sprint 1 tools (Tab "Tools", TRUE rows only)
+    // Format: Tool Name / Product Line / Built By / Description / Link / Include (TRUE/FALSE)
+    const TOOLS_SHEET_CSV_URL = "sprint1-tools.csv";
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const app = AUTH_ENABLED ? initializeApp(firebaseConfig) : null;
+    const auth = AUTH_ENABLED ? getAuth(app) : null;
+    const db = AUTH_ENABLED ? getFirestore(app) : null;
+    const provider = AUTH_ENABLED ? new GoogleAuthProvider() : null;
+
+    let currentUser = null;
+
+    const MOCK_IDEAS = null;
+
+    const TRACK_C_CATEGORIES = [
+      'Problem Discovery',
+      'FRF Drafting',
+      'BRD Review and Sign-off',
+      'UAT',
+      'Feature Education and Rollout',
+      'Miscellaneous',
+    ];
+
+    // ── Auth ──────────────────────────────────────────────────────────────────
+
+    window.signInWithGoogle = async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e) {
+        showToast('Sign-in failed. Please try again.', 'error');
+      }
+    };
+
+    window.signOut = async () => {
+      await fbSignOut(auth);
+    };
+
+    function setNavAvatar(user) {
+      const img = document.getElementById('navAvatar');
+      const initials = document.getElementById('navAvatarInitials');
+      initials.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
+      if (user.photoURL) {
+        img.src = user.photoURL;
+        img.style.display = '';
+        initials.style.display = 'none';
+      } else {
+        img.style.display = 'none';
+        initials.style.display = 'flex';
+      }
+    }
+
+    if (!AUTH_ENABLED) {
+      currentUser = { email: 'preview@shopee.com', displayName: 'Preview User', photoURL: '' };
+      document.getElementById('authGate').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      loadAll();
+    } else {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          currentUser = user;
+          document.getElementById('authGate').style.display = 'none';
+          document.getElementById('mainContent').style.display = 'block';
+          document.getElementById('navUser').style.display = 'flex';
+          setNavAvatar(user);
+          document.getElementById('navName').textContent = user.displayName || user.email;
+          document.getElementById('pageTitle').textContent = user.displayName
+            ? user.displayName.split(' ')[0] + "'s Sprint Plan"
+            : 'My Sprint Plan';
+          loadAll();
+        } else {
+          currentUser = null;
+          document.getElementById('authGate').style.display = 'flex';
+          document.getElementById('mainContent').style.display = 'none';
+          document.getElementById('navUser').style.display = 'none';
+        }
+      });
+    }
+
+    // ── Tabs ──────────────────────────────────────────────────────────────────
+
+    window.closeConfirmModal = () => {
+      document.getElementById('confirmModal').style.display = 'none';
+    };
+
+    window.showConfirmModal = (onConfirm) => {
+      const modal = document.getElementById('confirmModal');
+      const btn = document.getElementById('confirmModalDeleteBtn');
+      btn.onclick = async () => { closeConfirmModal(); await onConfirm(); };
+      modal.style.display = 'flex';
+    };
+
+    window.switchTab = (id, btn) => {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active');
+      btn.classList.add('active');
+    };
+
+    window.toggleCategory = (slug) => {
+      const body = document.getElementById('cat-body-' + slug);
+      const chevron = document.getElementById('cat-chevron-' + slug);
+      const isOpen = body.style.display !== 'none';
+      body.style.display = isOpen ? 'none' : 'block';
+      chevron.innerHTML = isOpen ? '&#9654;' : '&#9660;';
+    };
+
+
+    // ── Toast ─────────────────────────────────────────────────────────────────
+
+    function showToast(msg, type = '') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast ' + type + ' show';
+      setTimeout(() => { t.classList.remove('show'); }, 3000);
+    }
+
+    // ── CSV parser ────────────────────────────────────────────────────────────
+
+    function parseCSV(text) {
+      const rows = [];
+      const lines = text.trim().split('\n');
+      for (const line of lines) {
+        const cols = [];
+        let cur = '';
+        let inQuote = false;
+        for (let i = 0; i < line.length; i++) {
+          const c = line[i];
+          if (c === '"') { inQuote = !inQuote; }
+          else if (c === ',' && !inQuote) { cols.push(cur.trim()); cur = ''; }
+          else { cur += c; }
+        }
+        cols.push(cur.trim());
+        rows.push(cols);
+      }
+      return rows;
+    }
+
+    async function fetchCSV(url) {
+      if (!url || url.startsWith('REPLACE')) return null;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        return parseCSV(await res.text());
+      } catch {
+        return null;
+      }
+    }
+
+    // ── Load all ──────────────────────────────────────────────────────────────
+
+    async function loadAll() {
+      await Promise.all([loadTrackA(), loadTrackB(), loadTrackC()]);
+    }
+
+    // ── TRACK A ───────────────────────────────────────────────────────────────
+
+    async function loadTrackA() {
+      const el = document.getElementById('trackAContent');
+
+      const rows = await fetchCSV(KB_SHEET_CSV_URL);
+
+      if (!rows) {
+        // Placeholder state (sheet not yet ready — available 1 May)
+        el.innerHTML = `
+          <div class="placeholder-state">
+            <div class="placeholder-icon">📋</div>
+            <h3>Module list coming 1 May</h3>
+            <p>The KB module list is being finalised by squad leads and will load here automatically once available. Your assigned module will appear at the top.</p>
+          </div>`;
+        return;
+      }
+
+      // Skip header row; columns: 0=ProductLine, 1=Domain, 2=Subdomain, 3=ModuleName, 4=Description, 5=Status, 6=AssignedTo, 7=Link
+      const modules = rows.slice(1).filter(r => r[3]);
+      const myEmail = currentUser.email.toLowerCase();
+
+      // Volunteer action
+      window.volunteerModule = async (moduleId, btn) => {
+        btn.disabled = true;
+        try {
+          await setDoc(doc(db, 'moduleVolunteers', moduleId + '_' + myEmail), {
+            moduleId,
+            email: myEmail,
+            displayName: currentUser.displayName || myEmail,
+            volunteeredAt: serverTimestamp()
+          });
+          showToast('Volunteered! Your RM will confirm the assignment.', 'success');
+          loadTrackA();
+        } catch (e) {
+          btn.disabled = false;
+          showToast('Failed to volunteer. Please try again.', 'error');
+        }
+      };
+
+      // Fetch volunteer records (skip when previewing without Firebase)
+      const volunteers = {};
+      if (AUTH_ENABLED) {
+        const volSnap = await getDocs(collection(db, 'moduleVolunteers'));
+        volSnap.forEach(d => {
+          const v = d.data();
+          if (!volunteers[v.moduleId]) volunteers[v.moduleId] = [];
+          volunteers[v.moduleId].push(v);
+        });
+      }
+
+      const myModules = modules.filter(r => (r[6] || '').toLowerCase() === myEmail);
+      const unassigned = modules.filter(r => !(r[6] || '').trim());
+      const others = modules.filter(r => {
+        const a = (r[6] || '').toLowerCase();
+        return a && a !== myEmail;
+      });
+
+      let html = '';
+
+      if (myModules.length) {
+        html += `<div class="section-eyebrow" style="margin-bottom:0.75rem;">Your assigned module${myModules.length > 1 ? 's' : ''}</div>`;
+        html += '<div class="module-grid" style="margin-bottom:1.5rem;">';
+        myModules.forEach((r, i) => {
+          const id = slugify(r[3]);
+          html += renderModuleCard(r, id, 'assigned-me', volunteers, false);
+        });
+        html += '</div>';
+      }
+
+      if (unassigned.length) {
+        html += `<div class="section-eyebrow" style="margin-bottom:0.75rem;">Unassigned modules — volunteer to take one</div>`;
+        html += '<div class="module-grid" style="margin-bottom:1.5rem;">';
+        unassigned.forEach(r => {
+          const id = slugify(r[3]);
+          const alreadyVol = (volunteers[id] || []).some(v => v.email === myEmail);
+          html += renderModuleCard(r, id, 'unassigned', volunteers, !alreadyVol);
+        });
+        html += '</div>';
+      }
+
+      if (others.length) {
+        html += `<details style="margin-top:0.5rem;"><summary style="cursor:pointer; font-size:0.82rem; color:var(--muted); margin-bottom:0.75rem;">All assigned modules (${others.length})</summary>`;
+        html += '<div class="module-grid" style="margin-top:0.75rem;">';
+        others.forEach(r => {
+          const id = slugify(r[3]);
+          html += renderModuleCard(r, id, 'assigned-other', volunteers, false);
+        });
+        html += '</div></details>';
+      }
+
+      if (!html) {
+        html = `<div class="placeholder-state">
+          <div class="placeholder-icon">📋</div>
+          <h3>No modules found</h3>
+          <p>Check back after the squad lead review on 27 Apr.</p>
+        </div>`;
+      }
+
+      el.innerHTML = html;
+    }
+
+    function renderModuleCard(r, id, statusType, volunteers, canVolunteer) {
+      const [prodLine, domain, subdomain, name, desc, status, assignedTo, link] = r;
+      const volList = (volunteers[id] || []);
+
+      let badge = '';
+      if (statusType === 'assigned-me') {
+        badge = `<span class="status-badge status-assigned-me">Assigned to you</span>`;
+      } else if (statusType === 'unassigned') {
+        badge = `<span class="status-badge status-unassigned">Unassigned</span>`;
+      } else {
+        badge = `<span class="status-badge status-assigned-other">Assigned</span>`;
+      }
+
+      const volHtml = canVolunteer
+        ? `<button class="btn-volunteer" onclick="volunteerModule('${id}', this)">Volunteer</button>`
+        : (statusType === 'unassigned' && volList.length
+          ? `<span style="font-size:0.75rem;color:var(--muted);">${volList.length} volunteered</span>`
+          : '');
+
+      const linkHtml = link && !link.startsWith('REPLACE')
+        ? `<a href="${link}" target="_blank" style="font-size:0.78rem;color:var(--orange);font-weight:600;text-decoration:none;">View draft &rarr;</a>`
+        : '';
+
+      return `
+        <div class="module-card ${statusType === 'assigned-me' ? 'assigned' : statusType === 'assigned-other' ? 'assigned-other' : ''}">
+          <div class="module-card-left">
+            <div class="module-meta">
+              ${prodLine ? `<span class="module-tag">${prodLine}</span>` : ''}
+              ${domain ? `<span class="module-tag">${domain}</span>` : ''}
+              ${subdomain ? `<span class="module-tag" style="background:#f0f4ff;color:var(--navy);">${subdomain}</span>` : ''}
+            </div>
+            <div class="module-name">${name}</div>
+            ${desc ? `<div class="module-desc">${desc}</div>` : ''}
+            ${assignedTo && statusType !== 'assigned-me' ? `<div class="module-assignee">Assigned to <strong>${assignedTo}</strong></div>` : ''}
+            ${linkHtml}
+          </div>
+          <div class="module-card-right" style="display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem;">
+            ${badge}
+            ${volHtml}
+          </div>
+        </div>`;
+    }
+
+    // ── TRACK B ───────────────────────────────────────────────────────────────
+
+    async function loadTrackB() {
+      const el = document.getElementById('trackBContent');
+
+      const rows = await fetchCSV(TOOLS_SHEET_CSV_URL);
+
+      if (!rows) {
+        el.innerHTML = `
+          <div class="placeholder-state">
+            <div class="placeholder-icon">🛠</div>
+            <h3>Sprint 1 tools loading...</h3>
+            <p>The tool list will appear here once the Google Sheet is connected. Contact your RM if this persists.</p>
+          </div>`;
+        return;
+      }
+
+      // Skip header; columns: 0=ToolName, 1=ProductLine, 2=BuiltBy, 3=Description, 4=Link, 5=Include(TRUE/FALSE)
+      // Only show tools where the current user's display name appears in the Built By field
+      const myName = (currentUser.displayName || '').toLowerCase();
+      const allTools = rows.slice(1).filter(r => (r[5] || '').toUpperCase() === 'TRUE' && r[0]);
+      console.log('Total TRUE tools:', allTools.length);
+      console.log('myName:', myName);
+      allTools.forEach(r => console.log(r[0], '| builtBy:', r[2], '| match:', (r[2]||'').toLowerCase().includes(myName)));
+      const tools = allTools.filter(r => {
+        const builders = (r[2] || '').toLowerCase();
+        return myName && builders.includes(myName);
+      });
+
+      if (!tools.length) {
+        el.innerHTML = `<div class="placeholder-state">
+          <div class="placeholder-icon">🛠</div>
+          <h3>No tools found for you</h3>
+          <p>Track B is for improving tools you built in Sprint 1. If you think this is an error, contact your RM — your name may be listed differently in the sheet.</p>
+        </div>`;
+        return;
+      }
+
+      const plansByTool = {};
+      const feedbackByPlan = {};
+      if (AUTH_ENABLED) {
+        const plansSnap = await getDocs(query(
+          collection(db, 'trackBPlans'),
+          where('email', '==', currentUser.email),
+          orderBy('createdAt', 'desc')
+        ));
+        plansSnap.forEach(d => {
+          const data = { id: d.id, ...d.data() };
+          if (!plansByTool[data.toolId]) plansByTool[data.toolId] = [];
+          plansByTool[data.toolId].push(data);
+        });
+        const fbSnap = await getDocs(query(
+          collection(db, 'trackBFeedback'),
+          where('participantEmail', '==', currentUser.email)
+        ));
+        fbSnap.forEach(d => { feedbackByPlan[d.data().planId] = d.data().text; });
+      }
+
+      let html = '<div class="tool-grid">';
+      tools.forEach(r => {
+        const [name, prodLine, builtBy, desc, link] = r;
+        const toolId = slugify(name);
+        const plans = plansByTool[toolId] || [];
+        const hasPlan = plans.length > 0;
+
+        html += `
+          <div class="tool-card ${hasPlan ? 'open' : ''}" id="tool-${toolId}">
+            <div class="tool-card-header" onclick="toggleTool('${toolId}')">
+              <div class="tool-header-left">
+                <div class="tool-name">${name}</div>
+                <div class="tool-meta">
+                  ${prodLine ? `<span>${prodLine}</span>` : ''}
+                  ${builtBy ? `<span>Built by ${builtBy}</span>` : ''}
+                  ${hasPlan ? `<span style="color:var(--green);font-weight:600;">${plans.length} plan${plans.length > 1 ? 's' : ''} submitted</span>` : ''}
+                </div>
+              </div>
+              <span class="chevron">&#9660;</span>
+            </div>
+            <div class="tool-card-body">
+              ${desc ? `<div class="tool-description">${desc}</div>` : ''}
+              ${link && !link.startsWith('REPLACE') ? `<div class="tool-link-row"><a href="${link}" target="_blank">View tool &rarr;</a></div>` : ''}
+              <div class="submissions-section">
+                <div class="submissions-label">Your enhancement plans</div>
+                <div id="plans-${toolId}">
+                  ${renderPlans(plans, feedbackByPlan, toolId)}
+                </div>
+                <div id="editor-${toolId}"></div>
+                <button class="add-plan-btn" id="addbtn-${toolId}" onclick="showPlanEditor('${toolId}')">
+                  + Add enhancement plan
+                </button>
+              </div>
+            </div>
+          </div>`;
+      });
+      html += '</div>';
+
+      el.innerHTML = html;
+
+      // Attach window functions now that DOM is ready
+      window.toggleTool = (id) => {
+        document.getElementById('tool-' + id).classList.toggle('open');
+      };
+
+      window.showPlanEditor = (toolId, existingId = null, existingText = '') => {
+        document.getElementById('addbtn-' + toolId).style.display = 'none';
+        const editorEl = document.getElementById('editor-' + toolId);
+        editorEl.innerHTML = `
+          <div class="plan-editor">
+            <textarea id="textarea-${toolId}" placeholder="Describe your enhancement plan: what you will improve, how, and what production-ready looks like for this tool.">${existingText}</textarea>
+            <div class="plan-editor-actions">
+              <button class="btn-cancel" onclick="cancelPlanEditor('${toolId}')">Cancel</button>
+              <button class="btn-save" onclick="savePlan('${toolId}', '${existingId || ''}')">Save plan</button>
+            </div>
+          </div>`;
+        document.getElementById('textarea-' + toolId).focus();
+      };
+
+      window.cancelPlanEditor = (toolId) => {
+        document.getElementById('editor-' + toolId).innerHTML = '';
+        document.getElementById('addbtn-' + toolId).style.display = 'flex';
+      };
+
+      window.savePlan = async (toolId, existingId) => {
+        const text = document.getElementById('textarea-' + toolId).value.trim();
+        if (!text) { showToast('Plan cannot be empty.', 'error'); return; }
+        try {
+          if (existingId) {
+            await updateDoc(doc(db, 'trackBPlans', existingId), {
+              text,
+              updatedAt: serverTimestamp()
+            });
+            showToast('Plan updated.', 'success');
+          } else {
+            await addDoc(collection(db, 'trackBPlans'), {
+              toolId,
+              text,
+              email: currentUser.email,
+              displayName: currentUser.displayName || currentUser.email,
+              createdAt: serverTimestamp(),
+              updatedAt: serverTimestamp()
+            });
+            showToast('Plan saved.', 'success');
+          }
+          await loadTrackB();
+        } catch (e) {
+          showToast('Failed to save. Please try again.', 'error');
+        }
+      };
+
+      window.editPlan = (toolId, planId, text) => {
+        showPlanEditor(toolId, planId, text);
+      };
+
+      window.deletePlan = async (toolId, planId) => {
+        if (!confirm('Delete this plan? This cannot be undone.')) return;
+        try {
+          await deleteDoc(doc(db, 'trackBPlans', planId));
+          showToast('Plan deleted.', '');
+          loadTrackB();
+        } catch {
+          showToast('Failed to delete.', 'error');
+        }
+      };
+    }
+
+    function renderPlans(plans, feedbackByPlan, toolId) {
+      if (!plans.length) return '<p style="font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem;">No plans submitted yet.</p>';
+      return plans.map(p => {
+        const fb = feedbackByPlan[p.id];
+        const ts = p.createdAt ? formatTs(p.createdAt) : '';
+        return `
+          <div class="submission-item ${fb ? 'has-feedback' : ''}">
+            <div class="submission-header">
+              <span class="submission-ts">${ts}</span>
+              <div class="submission-actions">
+                <button class="btn-sm" onclick="editPlan('${toolId}', '${p.id}', ${JSON.stringify(p.text)})">Edit</button>
+                <button class="btn-sm danger" onclick="deletePlan('${toolId}', '${p.id}')">Delete</button>
+              </div>
+            </div>
+            <div class="submission-text">${escHtml(p.text)}</div>
+            ${fb ? `<div class="feedback-block"><div class="feedback-label">Feedback</div><div class="feedback-text">${escHtml(fb)}</div></div>` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    // ── TRACK C ───────────────────────────────────────────────────────────────
+
+    let _trackCIdeas = [];
+
+    async function loadTrackC() {
+      const el = document.getElementById('trackCContent');
+
+      let ideas, volByIdea = {}, upvoteCountByIdea = {}, myUpvotes = new Set(), myBuildPlansByIdea = {}, feedbackByPlan = {};
+
+      {
+        const [ideasSnap, volSnap, upvoteSnap, buildPlansSnap, fbSnap] = await Promise.all([
+          getDocs(query(collection(db, 'trackCIdeas'), orderBy('createdAt', 'desc'))),
+          getDocs(collection(db, 'trackCVolunteers')),
+          getDocs(collection(db, 'trackCUpvotes')),
+          getDocs(query(collection(db, 'trackCBuildPlans'), where('email', '==', currentUser.email), orderBy('createdAt', 'desc'))),
+          getDocs(query(collection(db, 'trackCBuildFeedback'), where('participantEmail', '==', currentUser.email))),
+        ]);
+
+        ideas = [];
+        ideasSnap.forEach(d => ideas.push({ id: d.id, ...d.data() }));
+
+        volSnap.forEach(d => {
+          const v = d.data();
+          if (!volByIdea[v.ideaId]) volByIdea[v.ideaId] = [];
+          volByIdea[v.ideaId].push(v);
+        });
+
+        upvoteSnap.forEach(d => {
+          const v = d.data();
+          upvoteCountByIdea[v.ideaId] = (upvoteCountByIdea[v.ideaId] || 0) + 1;
+          if (v.email === currentUser.email) myUpvotes.add(v.ideaId);
+        });
+
+        buildPlansSnap.forEach(d => {
+          const data = { id: d.id, ...d.data() };
+          if (!myBuildPlansByIdea[data.ideaId]) myBuildPlansByIdea[data.ideaId] = [];
+          myBuildPlansByIdea[data.ideaId].push(data);
+        });
+
+        fbSnap.forEach(d => { feedbackByPlan[d.data().planId] = d.data().text; });
+      }
+
+      _trackCIdeas = ideas;
+
+      // Group ideas by category, sorted by upvotes descending
+      const ideasByCategory = {};
+      TRACK_C_CATEGORIES.forEach(cat => { ideasByCategory[cat] = []; });
+      ideas.forEach(idea => {
+        const cat = idea.category || 'Miscellaneous';
+        if (!ideasByCategory[cat]) ideasByCategory[cat] = [];
+        ideasByCategory[cat].push(idea);
+      });
+      TRACK_C_CATEGORIES.forEach(cat => {
+        ideasByCategory[cat].sort((a, b) => (upvoteCountByIdea[b.id] || 0) - (upvoteCountByIdea[a.id] || 0));
+      });
+
+      function renderIdeaCard(idea) {
+        const isMe = idea.email === currentUser.email;
+        const vols = volByIdea[idea.id] || [];
+        const myBuild = vols.find(v => v.email === currentUser.email && v.role === 'build');
+        const myTest = vols.find(v => v.email === currentUser.email && v.role === 'test');
+        const builders = vols.filter(v => v.role === 'build');
+        const testers = vols.filter(v => v.role === 'test');
+        const upvotes = upvoteCountByIdea[idea.id] || 0;
+        const iVoted = myUpvotes.has(idea.id);
+        const myPlans = myBuildPlansByIdea[idea.id] || [];
+        const ts = idea.createdAt ? formatTs(idea.createdAt) : '';
+
+        return `
+          <div class="idea-card ${isMe ? 'mine' : ''}">
+            <div style="display:flex;gap:0;align-items:stretch;">
+              <div style="flex:1;min-width:0;">
+                <div class="idea-card-header">
+                  <div>
+                    ${isMe ? '<span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--orange);">Your idea</span>' : ''}
+                    <div class="idea-author"><strong>${escHtml(idea.displayName || idea.email)}</strong> &middot; ${ts}</div>
+                  </div>
+                  ${isMe ? `<div style="display:flex;gap:0.4rem;">
+                    <button class="btn-sm" onclick="editIdea('${idea.id}')">Edit</button>
+                    <button class="btn-sm danger" onclick="deleteIdea('${idea.id}')">Delete</button>
+                  </div>` : ''}
+                </div>
+                <div class="idea-text rich-text-display" id="idea-text-${idea.id}">${renderIdeaHtml(idea.text)}</div>
+                <div id="idea-editor-${idea.id}"></div>
+                <div class="idea-footer">
+                  <button class="btn-upvote ${iVoted ? 'active' : ''}" onclick="toggleUpvote('${idea.id}')">
+                    &#9650; ${upvotes > 0 ? upvotes : ''}
+                  </button>
+                  ${!isMe ? `
+                    <button class="btn-volunteer-sm ${myBuild ? 'active' : ''}" onclick="volunteerIdea('${idea.id}', 'build')">
+                      ${myBuild ? 'Building' : 'Volunteer to build'}
+                    </button>` : ''}
+                  <button class="btn-volunteer-sm ${myTest ? 'active' : ''}" onclick="volunteerIdea('${idea.id}', 'test')">
+                    ${myTest ? 'Testing' : 'Volunteer to test'}
+                  </button>
+                </div>
+              </div>
+              ${(builders.length || testers.length) ? `
+              <div style="width:120px;flex-shrink:0;border-left:1px solid var(--border);padding:0.85rem 0.75rem;display:flex;flex-direction:column;gap:0.6rem;background:#fafafa;">
+                ${builders.length ? `<div>
+                  <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--green);margin-bottom:0.25rem;">Building</div>
+                  ${builders.map(v => `<div style="font-size:0.73rem;color:var(--text);line-height:1.3;">${escHtml(v.displayName || v.email)}</div>`).join('')}
+                </div>` : ''}
+                ${testers.length ? `<div>
+                  <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--navy);margin-bottom:0.25rem;">Testing</div>
+                  ${testers.map(v => `<div style="font-size:0.73rem;color:var(--text);line-height:1.3;">${escHtml(v.displayName || v.email)}</div>`).join('')}
+                </div>` : ''}
+              </div>` : ''}
+            </div>
+            ${myBuild ? `
+              <div class="idea-build-plans">
+                <div class="idea-build-plans-label">Your build plans</div>
+                <div id="cplans-${idea.id}">
+                  ${renderCBuildPlans(myPlans, feedbackByPlan, idea.id)}
+                </div>
+                <div id="ceditor-${idea.id}"></div>
+                <button class="add-plan-btn" id="caddbtn-${idea.id}" onclick="showCPlanEditor('${idea.id}')">
+                  + Add build plan
+                </button>
+              </div>` : ''}
+          </div>`;
+      }
+
+      let html = '<div class="ideas-section">';
+
+      const catSlug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      TRACK_C_CATEGORIES.forEach(cat => {
+        const catIdeas = ideasByCategory[cat] || [];
+        const slug = catSlug(cat);
+        const hasIdeas = catIdeas.length > 0;
+        html += `
+          <div style="margin-bottom:0.75rem;background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;" id="cat-${slug}">
+            <div onclick="toggleCategory('${slug}')" style="display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.1rem;cursor:pointer;user-select:none;" id="cat-header-${slug}">
+              <div style="display:flex;align-items:center;gap:0.65rem;">
+                <span style="font-size:0.9rem;font-weight:700;color:var(--navy);">${escHtml(cat)}</span>
+                <span style="font-size:0.72rem;font-weight:600;padding:2px 7px;border-radius:10px;background:${hasIdeas ? '#fff3f0' : 'var(--bg)'};color:${hasIdeas ? 'var(--orange)' : 'var(--muted)'};">${catIdeas.length} idea${catIdeas.length !== 1 ? 's' : ''}</span>
+              </div>
+              <span style="font-size:0.8rem;color:var(--muted);transition:transform 0.2s;" id="cat-chevron-${slug}">${hasIdeas ? '&#9660;' : '&#9654;'}</span>
+            </div>
+            <div id="cat-body-${slug}" style="display:${hasIdeas ? 'block' : 'none'};padding:0 1rem 1rem;">
+              ${catIdeas.length === 0
+                ? `<div style="font-size:0.83rem;color:var(--muted);padding:0.5rem 0;">No ideas yet. Be the first to propose one below.</div>`
+                : catIdeas.map(renderIdeaCard).join('')
+              }
+            </div>
+          </div>`;
+      });
+
+      html += `
+        <div class="new-idea-section">
+          <h3>Propose a new idea</h3>
+          <p>What AI tool would make your local product team more productive? Describe the workflow problem and your proposed solution.</p>
+          <div style="margin-bottom:0.65rem;">
+            <label style="font-size:0.78rem;font-weight:600;color:var(--muted);display:block;margin-bottom:0.35rem;">Category</label>
+            <select id="newIdeaCategory" style="border:1px solid var(--border);border-radius:6px;padding:0.45rem 0.65rem;font-size:0.85rem;font-family:inherit;color:var(--text);outline:none;min-width:260px;">
+              <option value="">Select a category...</option>
+              ${TRACK_C_CATEGORIES.map(c => `<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('')}
+            </select>
+          </div>
+          ${buildRichEditor('newIdea', '', 'Describe the workflow problem and your proposed AI tool solution. Include which team or workflow this is for.')}
+          <div style="margin-top:0.5rem;">
+            <button class="btn-primary" onclick="submitIdea()">Submit idea</button>
+          </div>
+        </div>
+      </div>`;
+
+      el.innerHTML = html;
+
+      // ── window functions ──────────────────────────────────────────────────
+
+      window.submitIdea = async () => {
+        const text = getRichEditorValue('newIdea');
+        const plain = (document.getElementById('rte-content-newIdea')?.textContent || '').trim();
+        const category = document.getElementById('newIdeaCategory').value;
+        if (!category) { showToast('Please select a category.', 'error'); return; }
+        if (!plain) { showToast('Please describe your idea.', 'error'); return; }
+        try {
+          await addDoc(collection(db, 'trackCIdeas'), {
+            text, category, email: currentUser.email,
+            displayName: currentUser.displayName || currentUser.email,
+            createdAt: serverTimestamp()
+          });
+          showToast('Idea submitted!', 'success');
+          document.getElementById('rte-content-newIdea').innerHTML = '';
+          document.getElementById('newIdeaCategory').value = '';
+          loadTrackC();
+        } catch { showToast('Failed to submit. Please try again.', 'error'); }
+      };
+
+      window.editIdea = (ideaId) => {
+        const idea = _trackCIdeas.find(i => i.id === ideaId);
+        if (!idea) { showToast('Idea not found.', 'error'); return; }
+        document.getElementById('idea-text-' + ideaId).style.display = 'none';
+        document.getElementById('idea-editor-' + ideaId).innerHTML = `
+          <div style="margin-top:0.5rem;">${buildRichEditor('edit-' + ideaId, idea.text || '', 'Edit your idea...')}</div>
+          <div style="margin-top:0.5rem;display:flex;gap:0.5rem;">
+            <button class="btn-save" onclick="saveIdeaEdit('${ideaId}')">Save</button>
+            <button class="btn-cancel" onclick="cancelIdeaEdit('${ideaId}')">Cancel</button>
+          </div>`;
+      };
+
+      window.cancelIdeaEdit = (ideaId) => {
+        document.getElementById('idea-editor-' + ideaId).innerHTML = '';
+        document.getElementById('idea-text-' + ideaId).style.display = '';
+      };
+
+      window.saveIdeaEdit = async (ideaId) => {
+        const text = getRichEditorValue('edit-' + ideaId);
+        const plain = (document.getElementById('rte-content-edit-' + ideaId)?.textContent || '').trim();
+        if (!plain) { showToast('Idea cannot be empty.', 'error'); return; }
+        try {
+          await updateDoc(doc(db, 'trackCIdeas', ideaId), { text, updatedAt: serverTimestamp() });
+          showToast('Idea updated.', 'success');
+          loadTrackC();
+        } catch { showToast('Failed to save.', 'error'); }
+      };
+
+      window.deleteIdea = (ideaId) => {
+        showConfirmModal(async () => {
+          try {
+            await deleteDoc(doc(db, 'trackCIdeas', ideaId));
+            showToast('Idea deleted.', '');
+            loadTrackC();
+          } catch { showToast('Failed to delete.', 'error'); }
+        });
+      };
+
+      window.toggleUpvote = async (ideaId) => {
+        const upvoteId = ideaId + '_' + currentUser.email;
+        const ref = doc(db, 'trackCUpvotes', upvoteId);
+        const existing = await getDoc(ref);
+        if (existing.exists()) {
+          await deleteDoc(ref);
+        } else {
+          await setDoc(ref, { ideaId, email: currentUser.email, upvotedAt: serverTimestamp() });
+        }
+        loadTrackC();
+      };
+
+      window.volunteerIdea = async (ideaId, role) => {
+        // Separate doc per role: ideaId_email_build / ideaId_email_test
+        const volId = ideaId + '_' + currentUser.email + '_' + role;
+        const ref = doc(db, 'trackCVolunteers', volId);
+        const existing = await getDoc(ref);
+        if (existing.exists()) {
+          await deleteDoc(ref);
+          showToast('Removed from volunteers.', '');
+        } else {
+          await setDoc(ref, {
+            ideaId, role,
+            email: currentUser.email,
+            displayName: currentUser.displayName || currentUser.email,
+            volunteeredAt: serverTimestamp()
+          });
+          showToast(role === 'build' ? 'Volunteered to build!' : 'Volunteered to test!', 'success');
+        }
+        loadTrackC();
+      };
+
+      window.showCPlanEditor = (ideaId, existingId = null, existingText = '') => {
+        document.getElementById('caddbtn-' + ideaId).style.display = 'none';
+        document.getElementById('ceditor-' + ideaId).innerHTML = `
+          <div class="plan-editor">
+            <textarea id="ctextarea-${ideaId}" placeholder="Describe your build plan: what you will build, how, and what done looks like.">${existingText}</textarea>
+            <div class="plan-editor-actions">
+              <button class="btn-cancel" onclick="cancelCPlanEditor('${ideaId}')">Cancel</button>
+              <button class="btn-save" onclick="saveCPlan('${ideaId}', '${existingId || ''}')">Save plan</button>
+            </div>
+          </div>`;
+        document.getElementById('ctextarea-' + ideaId).focus();
+      };
+
+      window.cancelCPlanEditor = (ideaId) => {
+        document.getElementById('ceditor-' + ideaId).innerHTML = '';
+        document.getElementById('caddbtn-' + ideaId).style.display = 'flex';
+      };
+
+      window.saveCPlan = async (ideaId, existingId) => {
+        const text = document.getElementById('ctextarea-' + ideaId).value.trim();
+        if (!text) { showToast('Plan cannot be empty.', 'error'); return; }
+        try {
+          if (existingId) {
+            await updateDoc(doc(db, 'trackCBuildPlans', existingId), { text, updatedAt: serverTimestamp() });
+            showToast('Plan updated.', 'success');
+          } else {
+            await addDoc(collection(db, 'trackCBuildPlans'), {
+              ideaId, text,
+              email: currentUser.email,
+              displayName: currentUser.displayName || currentUser.email,
+              createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+            });
+            showToast('Plan saved.', 'success');
+          }
+          loadTrackC();
+        } catch { showToast('Failed to save. Please try again.', 'error'); }
+      };
+
+      window.editCPlan = (ideaId, planId, text) => { showCPlanEditor(ideaId, planId, text); };
+
+      window.deleteCPlan = async (ideaId, planId) => {
+        if (!confirm('Delete this build plan?')) return;
+        try {
+          await deleteDoc(doc(db, 'trackCBuildPlans', planId));
+          showToast('Plan deleted.', '');
+          loadTrackC();
+        } catch { showToast('Failed to delete.', 'error'); }
+      };
+    }
+
+    function renderCBuildPlans(plans, feedbackByPlan, ideaId) {
+      if (!plans.length) return '<p style="font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem;">No build plans yet.</p>';
+      return plans.map(p => {
+        const fb = feedbackByPlan[p.id];
+        const ts = p.createdAt ? formatTs(p.createdAt) : '';
+        return `
+          <div class="submission-item ${fb ? 'has-feedback' : ''}">
+            <div class="submission-header">
+              <span class="submission-ts">${ts}</span>
+              <div class="submission-actions">
+                <button class="btn-sm" onclick="editCPlan('${ideaId}', '${p.id}', ${JSON.stringify(p.text)})">Edit</button>
+                <button class="btn-sm danger" onclick="deleteCPlan('${ideaId}', '${p.id}')">Delete</button>
+              </div>
+            </div>
+            <div class="submission-text">${escHtml(p.text)}</div>
+            ${fb ? `<div class="feedback-block"><div class="feedback-label">Feedback</div><div class="feedback-text">${escHtml(fb)}</div></div>` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    function slugify(str) {
+      return (str || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    }
+
+    function escHtml(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ─── Rich text ────────────────────────────────────────────────────────────
+    const ALLOWED_TAGS = new Set(['B','STRONG','I','EM','U','BR','P','UL','OL','LI','A','DIV','SPAN']);
+    function renderIdeaHtml(raw) {
+      if (!raw) return '';
+      // Legacy plain-text entries: escape and preserve line breaks.
+      if (!/<[a-z][\s\S]*>/i.test(raw)) return escHtml(raw).replace(/\n/g, '<br>');
+      const tpl = document.createElement('template');
+      tpl.innerHTML = raw;
+      (function walk(node) {
+        const children = Array.from(node.childNodes);
+        for (const child of children) {
+          if (child.nodeType === 1) {
+            if (!ALLOWED_TAGS.has(child.tagName)) {
+              const text = document.createTextNode(child.textContent || '');
+              child.replaceWith(text);
+              continue;
+            }
+            for (const attr of Array.from(child.attributes)) {
+              if (child.tagName === 'A' && attr.name === 'href' && /^https?:/i.test(attr.value)) continue;
+              child.removeAttribute(attr.name);
+            }
+            if (child.tagName === 'A') { child.setAttribute('target', '_blank'); child.setAttribute('rel', 'noopener'); }
+            walk(child);
+          } else if (child.nodeType !== 3 && child.nodeType !== 8) {
+            child.remove();
+          }
+        }
+      })(tpl.content);
+      return tpl.innerHTML;
+    }
+
+    // Build an HTML string for a contenteditable rich-text editor with a compact toolbar.
+    // Caller must read innerHTML from `#rte-content-${id}` to get the value, and pass it through renderIdeaHtml on save.
+    function buildRichEditor(id, initialHtml = '', placeholder = 'Start typing...') {
+      return `
+        <div class="rte-wrap">
+          <div class="rte-toolbar">
+            <button type="button" class="rte-btn" onmousedown="event.preventDefault(); document.execCommand('bold')"><b>B</b></button>
+            <button type="button" class="rte-btn" onmousedown="event.preventDefault(); document.execCommand('italic')"><i>I</i></button>
+            <button type="button" class="rte-btn" onmousedown="event.preventDefault(); document.execCommand('underline')"><u>U</u></button>
+            <button type="button" class="rte-btn" onmousedown="event.preventDefault(); document.execCommand('insertUnorderedList')">• List</button>
+            <button type="button" class="rte-btn" onmousedown="event.preventDefault(); document.execCommand('insertOrderedList')">1. List</button>
+          </div>
+          <div contenteditable="true" class="rte-content" id="rte-content-${id}" data-placeholder="${escHtml(placeholder)}">${renderIdeaHtml(initialHtml)}</div>
+        </div>`;
+    }
+
+    function getRichEditorValue(id) {
+      const el = document.getElementById('rte-content-' + id);
+      if (!el) return '';
+      // Strip through our sanitiser before saving.
+      return renderIdeaHtml(el.innerHTML);
+    }
+
+    function formatTs(ts) {
+      if (!ts) return '';
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleDateString('en-SG', { day: 'numeric', month: 'short' }) + ', ' +
+        d.toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' });
+    }
+  </script>
+
+</body>
+</html>
