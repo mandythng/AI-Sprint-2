@@ -373,6 +373,7 @@
       display: flex;
       align-items: center;
       gap: 0.35rem;
+      word-break: break-word;
     }
     .role-stub-name.unreviewed { color: var(--red); font-weight: 600; }
     .plan-dot { color: var(--red); font-size: 0.6rem; line-height: 1; }
@@ -1382,7 +1383,7 @@
                     ${testers.map(t => `<div class="role-stub-name">${escHtml(t.displayName || t.email)}</div>`).join('')}
                   </div>` : ''}
               </div>
-              <div style="display:flex;flex-direction:column;gap:0.3rem;align-items:flex-end;flex-shrink:0;">
+              <div style="display:flex;flex-direction:column;gap:0.3rem;align-items:flex-end;flex-shrink:0;width:130px;">
                 ${plans.length ? `<span class="review-count ${reviewedPlans === plans.length ? 'all-reviewed' : 'has-plans'}">${reviewedPlans}/${plans.length} plan${plans.length !== 1 ? 's' : ''} reviewed</span>` : ''}
                 ${!hasBuilder ? '<span class="unassigned-pill">No builder</span>' : ''}
                 ${!hasTester ? '<span class="unassigned-pill">No tester</span>' : ''}
