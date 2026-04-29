@@ -85,6 +85,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Track C idea feedback — admins write, owners read their own
+    match /trackCIdeaFeedback/{docId} {
+      allow get: if isAdmin() || (isSignedIn() && isOwner(resource.data.email));
+      allow list: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
     // Module volunteers — all signed-in read, participants write their own
     match /moduleVolunteers/{docId} {
       allow read: if isSignedIn();

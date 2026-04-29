@@ -765,7 +765,7 @@
       <div class="tab-panel" id="tab-trackC">
         <div class="section-eyebrow">Track C — Choose one</div>
         <div class="section-title">New Tools for Local Teams</div>
-        <div class="section-desc">Propose a new AI tool idea for local product team workflows, or volunteer to build or test someone else's idea.</div>
+        <div class="section-desc">Propose a new AI tool idea for local product team workflows, or volunteer to build or test someone else's idea. Submit your detailed Build Plan including the platform/interface, test plan, design principles, etc.</div>
 
         <div id="trackCContent">
           <div class="loading-spinner">
@@ -1329,15 +1329,16 @@
       if (_trackCEditOpen) return;
       const el = document.getElementById('trackCContent');
 
-      let ideas, volByIdea = {}, upvoteCountByIdea = {}, myUpvotes = new Set(), myBuildPlansByIdea = {}, feedbackByPlan = {};
+      let ideas, volByIdea = {}, upvoteCountByIdea = {}, myUpvotes = new Set(), myBuildPlansByIdea = {}, feedbackByPlan = {}, feedbackByIdea = {};
 
       {
-        const [ideasSnap, volSnap, upvoteSnap, buildPlansSnap, fbSnap] = await Promise.all([
+        const [ideasSnap, volSnap, upvoteSnap, buildPlansSnap, fbSnap, ideaFbSnap] = await Promise.all([
           getDocs(query(collection(db, 'trackCIdeas'), orderBy('createdAt', 'desc'))),
           getDocs(collection(db, 'trackCVolunteers')),
           getDocs(collection(db, 'trackCUpvotes')),
           getDocs(query(collection(db, 'trackCBuildPlans'), where('email', '==', currentUser.email), orderBy('createdAt', 'desc'))),
           getDocs(query(collection(db, 'trackCBuildFeedback'), where('participantEmail', '==', currentUser.email))),
+          getDocs(query(collection(db, 'trackCIdeaFeedback'), where('participantEmail', '==', currentUser.email))),
         ]);
 
         ideas = [];
@@ -1362,6 +1363,7 @@
         });
 
         fbSnap.forEach(d => { feedbackByPlan[d.data().planId] = d.data().text; });
+        ideaFbSnap.forEach(d => { feedbackByIdea[d.data().ideaId] = d.data().text; });
       }
 
       _trackCIdeas = ideas;
@@ -1405,6 +1407,12 @@
                   </div>` : ''}
                 </div>
                 <div class="idea-text rich-text-display" id="idea-text-${idea.id}">${renderIdeaHtml(idea.text)}</div>
+                ${isMe && feedbackByIdea[idea.id] ? `
+                  <div class="feedback-block" style="margin-top:0.75rem;">
+                    <div class="feedback-label">Admin Feedback</div>
+                    <div class="feedback-text">${escHtml(feedbackByIdea[idea.id])}</div>
+                  </div>
+                ` : ''}
                 <div id="idea-editor-${idea.id}"></div>
                 <div class="idea-footer">
                   <button class="btn-upvote ${iVoted ? 'active' : ''}" onclick="toggleUpvote('${idea.id}')">
@@ -1446,28 +1454,13 @@
 
       let html = '<div class="ideas-section">';
 
-      const catSlug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      TRACK_C_CATEGORIES.forEach(cat => {
-        const catIdeas = ideasByCategory[cat] || [];
-        const slug = catSlug(cat);
-        const hasIdeas = catIdeas.length > 0;
-        html += `
-          <div style="margin-bottom:0.75rem;background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;" id="cat-${slug}">
-            <div onclick="toggleCategory('${slug}')" style="display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.1rem;cursor:pointer;user-select:none;" id="cat-header-${slug}">
-              <div style="display:flex;align-items:center;gap:0.65rem;">
-                <span style="font-size:0.9rem;font-weight:700;color:var(--navy);">${escHtml(cat)}</span>
-                <span style="font-size:0.72rem;font-weight:600;padding:2px 7px;border-radius:10px;background:${hasIdeas ? '#fff3f0' : 'var(--bg)'};color:${hasIdeas ? 'var(--orange)' : 'var(--muted)'};">${catIdeas.length} idea${catIdeas.length !== 1 ? 's' : ''}</span>
-              </div>
-              <span style="font-size:0.8rem;color:var(--muted);transition:transform 0.2s;" id="cat-chevron-${slug}">${hasIdeas ? '&#9660;' : '&#9654;'}</span>
-            </div>
-            <div id="cat-body-${slug}" style="display:${hasIdeas ? 'block' : 'none'};padding:0 1rem 1rem;">
-              ${catIdeas.length === 0
-                ? `<div style="font-size:0.83rem;color:var(--muted);padding:0.5rem 0;">No ideas yet. Be the first to propose one below.</div>`
-                : catIdeas.map(renderIdeaCard).join('')
-              }
-            </div>
-          </div>`;
-      });
+      html += `
+        <div style="margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0;">
+          <input type="checkbox" id="filterMyIdeas" onchange="window.toggleMyIdeasFilter(this.checked)" style="cursor:pointer;width:16px;height:16px;accent-color:var(--orange);" />
+          <label for="filterMyIdeas" style="font-size:0.85rem;color:var(--navy);font-weight:600;cursor:pointer;">Ideas I'm building/testing</label>
+        </div>
+        <div id="trackCIdeasList"></div>
+      `;
 
       html += `
         <div class="new-idea-section">
@@ -1488,6 +1481,46 @@
       </div>`;
 
       el.innerHTML = html;
+
+      const catSlug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+      window.renderTrackCIdeasList = (filterActive) => {
+        let listHtml = '';
+        TRACK_C_CATEGORIES.forEach(cat => {
+          let catIdeas = ideasByCategory[cat] || [];
+          if (filterActive) {
+            catIdeas = catIdeas.filter(idea => {
+              const vols = volByIdea[idea.id] || [];
+              return vols.some(v => v.email === currentUser.email && (v.role === 'build' || v.role === 'test'));
+            });
+          }
+          const slug = catSlug(cat);
+          const expand = filterActive ? catIdeas.length > 0 : false;
+          listHtml += `
+            <div style="margin-bottom:0.75rem;background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;" id="cat-${slug}">
+              <div onclick="toggleCategory('${slug}')" style="display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.1rem;cursor:pointer;user-select:none;" id="cat-header-${slug}">
+                <div style="display:flex;align-items:center;gap:0.65rem;">
+                  <span style="font-size:0.9rem;font-weight:700;color:var(--navy);">${escHtml(cat)}</span>
+                  <span style="font-size:0.72rem;font-weight:600;padding:2px 7px;border-radius:10px;background:${catIdeas.length ? '#fff3f0' : 'var(--bg)'};color:${catIdeas.length ? 'var(--orange)' : 'var(--muted)'};">${catIdeas.length} idea${catIdeas.length !== 1 ? 's' : ''}</span>
+                </div>
+                <span style="font-size:0.8rem;color:var(--muted);transition:transform 0.2s;" id="cat-chevron-${slug}">${expand ? '&#9660;' : '&#9654;'}</span>
+              </div>
+              <div id="cat-body-${slug}" style="display:${expand ? 'block' : 'none'};padding:0 1rem 1rem;">
+                ${catIdeas.length === 0
+                  ? `<div style="font-size:0.83rem;color:var(--muted);padding:0.5rem 0;">${filterActive ? 'No ideas matching the filter.' : 'No ideas yet. Be the first to propose one below.'}</div>`
+                  : catIdeas.map(renderIdeaCard).join('')
+                }
+              </div>
+            </div>`;
+        });
+        document.getElementById('trackCIdeasList').innerHTML = listHtml;
+      };
+
+      window.toggleMyIdeasFilter = (checked) => {
+        window.renderTrackCIdeasList(checked);
+      };
+
+      window.renderTrackCIdeasList(false);
 
       // ── window functions ──────────────────────────────────────────────────
 
