@@ -956,20 +956,25 @@
 
     function parseCSV(text) {
       const rows = [];
-      const lines = text.trim().split('\n');
-      for (const line of lines) {
-        const cols = [];
-        let cur = '';
-        let inQuote = false;
-        for (let i = 0; i < line.length; i++) {
-          const c = line[i];
-          if (c === '"') { inQuote = !inQuote; }
-          else if (c === ',' && !inQuote) { cols.push(cur.trim()); cur = ''; }
-          else { cur += c; }
+      let cur = '', inQuote = false, cols = [];
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (c === '"') {
+          if (inQuote && text[i + 1] === '"') { cur += '"'; i++; }
+          else { inQuote = !inQuote; }
+        } else if (c === ',' && !inQuote) {
+          cols.push(cur.trim()); cur = '';
+        } else if ((c === '\n' || c === '\r') && !inQuote) {
+          if (c === '\r' && text[i + 1] === '\n') i++;
+          cols.push(cur.trim());
+          if (cols.some(v => v)) rows.push(cols);
+          cols = []; cur = '';
+        } else {
+          cur += c;
         }
-        cols.push(cur.trim());
-        rows.push(cols);
       }
+      cols.push(cur.trim());
+      if (cols.some(v => v)) rows.push(cols);
       return rows;
     }
 
