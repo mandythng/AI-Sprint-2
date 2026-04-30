@@ -702,7 +702,7 @@
     };
 
     // Google Sheet IDs (same as plan.html)
-    const KB_SHEET_CSV_URL = "REPLACE_WITH_MODULES_SHEET_PUBLISHED_CSV_URL";
+    const KB_SHEET_CSV_URL = "modules.csv";
     const TOOLS_SHEET_CSV_URL = "sprint1-tools.csv";
 
     // Hardcoded admin emails — all equal
@@ -876,16 +876,25 @@
 
     function parseCSV(text) {
       const rows = [];
-      for (const line of text.trim().split('\n')) {
-        const cols = []; let cur = ''; let inQ = false;
-        for (const c of line) {
-          if (c === '"') { inQ = !inQ; }
-          else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-          else { cur += c; }
+      let cur = '', inQuote = false, cols = [];
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (c === '"') {
+          if (inQuote && text[i + 1] === '"') { cur += '"'; i++; }
+          else { inQuote = !inQuote; }
+        } else if (c === ',' && !inQuote) {
+          cols.push(cur.trim()); cur = '';
+        } else if ((c === '\n' || c === '\r') && !inQuote) {
+          if (c === '\r' && text[i + 1] === '\n') i++;
+          cols.push(cur.trim());
+          if (cols.some(v => v)) rows.push(cols);
+          cols = []; cur = '';
+        } else {
+          cur += c;
         }
-        cols.push(cur.trim());
-        rows.push(cols);
       }
+      cols.push(cur.trim());
+      if (cols.some(v => v)) rows.push(cols);
       return rows;
     }
 
@@ -995,10 +1004,11 @@
         }
       });
 
-      const modules = rows.slice(1).filter(r => r[3]);
+      // Columns: 0=ProductLine, 1=Domain, 2=Topic, 3=Assignee, 4=AssigneeEmail
+      const modules = rows.slice(1).filter(r => r[2] && r[2].trim());
       const unassigned = modules.filter(r => {
-        const id = slugify(r[3]);
-        return getAssignees(r[6], overrides[id]).length === 0;
+        const id = slugify(r[2]);
+        return getAssignees(r[4], overrides[id]).length === 0;
       });
       const total = modules.length;
 
@@ -1008,8 +1018,8 @@
         <div class="summary-chip"><strong>${total - unassigned.length}</strong> assigned</div>`;
 
       const allPeople = [...new Set(modules.flatMap(r => {
-        const id = slugify(r[3]);
-        return getAssignees(r[6], overrides[id]);
+        const id = slugify(r[2]);
+        return getAssignees(r[4], overrides[id]);
       }).filter(Boolean))].sort();
 
       let html = `
@@ -1029,30 +1039,26 @@
           <tbody>`;
 
       modules.forEach(r => {
-        const [prodLine, domain, subdomain, name, desc, status, sheetAssigned] = r;
-        const id = slugify(name);
-        const assignees = getAssignees(sheetAssigned, overrides[id]);
+        const [prodLine, domain, topic, assigneeName, assigneeEmail] = r;
+        const id = slugify(topic);
+        const assignees = getAssignees(assigneeEmail, overrides[id]);
         const vols = volunteers[id] || [];
         const assignedSearchText = assignees.join(' ');
 
         html += `
-          <tr data-module-row data-assigned-to="${escHtml(assignedSearchText)}" data-module-name="${escHtml(name)}">
-            <td>${prodLine ? `<span class="cell-tag">${escHtml(prodLine)}</span>` : '<span style="color:var(--muted);">—</span>'}</td>
-            <td>
-              ${domain ? `<span class="cell-tag">${escHtml(domain)}</span>` : ''}
-              ${subdomain ? `<div style="margin-top:3px;"><span class="cell-tag" style="background:#f0f4ff;">${escHtml(subdomain)}</span></div>` : ''}
-            </td>
+          <tr data-module-row data-assigned-to="${escHtml(assignedSearchText)}" data-module-name="${escHtml(topic)}">
+            <td>${prodLine ? `<span class="cell-tag">${escHtml(prodLine.trim())}</span>` : '<span style="color:var(--muted);">—</span>'}</td>
+            <td>${domain ? `<span class="cell-tag" style="background:#f0f4ff;">${escHtml(domain.trim())}</span>` : ''}</td>
             <td style="min-width:220px;">
-              <div style="font-weight:700;color:var(--navy);font-size:0.9rem;">${escHtml(name)}</div>
-              ${desc ? `<div style="font-size:0.75rem;color:var(--muted);margin-top:3px;line-height:1.45;">${escHtml(desc)}</div>` : ''}
+              <div style="font-weight:700;color:var(--navy);font-size:0.9rem;">${escHtml(topic.trim())}</div>
             </td>
-            <td>${status ? escHtml(status) : '<span style="color:var(--muted);">—</span>'}</td>
+            <td><span style="color:var(--muted);">—</span></td>
             <td>
               ${assignees.length
                 ? assignees.map(a => `
                     <div class="assignee-row">
                       <span class="assigned-pill">${escHtml(a)}</span>
-                      <button class="btn-assignee-remove" title="Remove" onclick="removeAssignee('${id}', '${escHtml(name)}', ${JSON.stringify(a)})">&times;</button>
+                      <button class="btn-assignee-remove" title="Remove" onclick="removeAssignee('${id}', '${escHtml(topic)}', ${JSON.stringify(a)})">&times;</button>
                     </div>`).join('')
                 : `<span class="unassigned-pill">Unassigned</span>`}
             </td>
@@ -1065,7 +1071,7 @@
               <div style="display:flex;gap:0.4rem;align-items:center;">
                 <input type="text" class="assign-select" id="assignInput-${id}"
                   placeholder="Name or email" list="peoplelist" style="min-width:140px;" />
-                <button class="btn-assign" onclick="addAssignee('${id}', '${escHtml(name)}')">Add</button>
+                <button class="btn-assign" onclick="addAssignee('${id}', '${escHtml(topic)}')">Add</button>
               </div>
             </td>
           </tr>`;
