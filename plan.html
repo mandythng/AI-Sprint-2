@@ -1383,9 +1383,9 @@
           getDocs(query(collection(db, 'trackCIdeas'), orderBy('createdAt', 'desc'))),
           getDocs(collection(db, 'trackCVolunteers')),
           getDocs(collection(db, 'trackCUpvotes')),
-          getDocs(query(collection(db, 'trackCBuildPlans'), where('email', '==', currentUser.email), orderBy('createdAt', 'desc'))),
-          getDocs(query(collection(db, 'trackCBuildFeedback'), where('participantEmail', '==', currentUser.email))),
-          getDocs(query(collection(db, 'trackCIdeaFeedback'), where('participantEmail', '==', currentUser.email))),
+          getDocs(query(collection(db, 'trackCBuildPlans'), where('email', '==', currentUser.email), orderBy('createdAt', 'desc'))).catch(() => ({ forEach: () => {} })),
+          getDocs(query(collection(db, 'trackCBuildFeedback'), where('participantEmail', '==', currentUser.email))).catch(() => ({ forEach: () => {} })),
+          getDocs(query(collection(db, 'trackCIdeaFeedback'), where('participantEmail', '==', currentUser.email))).catch(() => ({ forEach: () => {} })),
         ]);
 
         ideas = [];
