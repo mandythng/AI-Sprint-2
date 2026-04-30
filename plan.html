@@ -823,7 +823,7 @@
     // Google Sheet IDs (published as CSV)
     // Track A: module list (Tab "Modules")
     // Format: Product Line / Domain / Subdomain / Module Name / Description / Status / Assigned To / Link
-    const KB_SHEET_CSV_URL = "REPLACE_WITH_MODULES_SHEET_PUBLISHED_CSV_URL";
+    const KB_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTb8h1_BuuYJXzzgOkcz3yZGZhEtnhwT7Xl7nET8mR4BoZOQQbt-UTY8blYhfc_KNc76eXnyZLnylrG/pub?gid=469500758&single=true&output=csv";
 
     const ADMIN_EMAILS = [
       'amanda.thng@shopee.com', 'winarsita.sotyaji@shopee.com', 'stella.simsx@shopee.com',
@@ -1009,8 +1009,8 @@
         return;
       }
 
-      // Skip header row; columns: 0=ProductLine, 1=Domain, 2=Subdomain, 3=ModuleName, 4=Description, 5=Status, 6=AssignedTo, 7=Link
-      const modules = rows.slice(1).filter(r => r[3]);
+      // Skip header row; columns: 0=ProductLine, 1=Domain, 2=Topic, 3=Assignee, 4=AssigneeEmail
+      const modules = rows.slice(1).filter(r => r[2] && r[2].trim());
       const myEmail = currentUser.email.toLowerCase();
 
       // Volunteer action
@@ -1042,11 +1042,17 @@
         });
       }
 
-      const myModules = modules.filter(r => (r[6] || '').toLowerCase() === myEmail);
-      const unassigned = modules.filter(r => !(r[6] || '').trim());
+      // Match email: col 4 may contain multiple emails separated by ; or /
+      const rowMatchesEmail = (r) => {
+        const raw = (r[4] || '').toLowerCase();
+        return raw.split(/[;\/\n]/).map(s => s.trim()).some(e => e === myEmail);
+      };
+
+      const myModules = modules.filter(rowMatchesEmail);
+      const unassigned = modules.filter(r => !(r[4] || '').trim());
       const others = modules.filter(r => {
-        const a = (r[6] || '').toLowerCase();
-        return a && a !== myEmail;
+        const raw = (r[4] || '').trim();
+        return raw && !rowMatchesEmail(r);
       });
 
       let html = '';
@@ -1054,8 +1060,8 @@
       if (myModules.length) {
         html += `<div class="section-eyebrow" style="margin-bottom:0.75rem;">Your assigned module${myModules.length > 1 ? 's' : ''}</div>`;
         html += '<div class="module-grid" style="margin-bottom:1.5rem;">';
-        myModules.forEach((r, i) => {
-          const id = slugify(r[3]);
+        myModules.forEach(r => {
+          const id = slugify(r[2]);
           html += renderModuleCard(r, id, 'assigned-me', volunteers, false);
         });
         html += '</div>';
@@ -1065,7 +1071,7 @@
         html += `<div class="section-eyebrow" style="margin-bottom:0.75rem;">Unassigned modules — volunteer to take one</div>`;
         html += '<div class="module-grid" style="margin-bottom:1.5rem;">';
         unassigned.forEach(r => {
-          const id = slugify(r[3]);
+          const id = slugify(r[2]);
           const alreadyVol = (volunteers[id] || []).some(v => v.email === myEmail);
           html += renderModuleCard(r, id, 'unassigned', volunteers, !alreadyVol);
         });
@@ -1076,7 +1082,7 @@
         html += `<details style="margin-top:0.5rem;"><summary style="cursor:pointer; font-size:0.82rem; color:var(--muted); margin-bottom:0.75rem;">All assigned modules (${others.length})</summary>`;
         html += '<div class="module-grid" style="margin-top:0.75rem;">';
         others.forEach(r => {
-          const id = slugify(r[3]);
+          const id = slugify(r[2]);
           html += renderModuleCard(r, id, 'assigned-other', volunteers, false);
         });
         html += '</div></details>';
@@ -1094,7 +1100,7 @@
     }
 
     function renderModuleCard(r, id, statusType, volunteers, canVolunteer) {
-      const [prodLine, domain, subdomain, name, desc, status, assignedTo, link] = r;
+      const [prodLine, domain, topic, assignee] = r;
       const volList = (volunteers[id] || []);
 
       let badge = '';
@@ -1112,22 +1118,15 @@
           ? `<span style="font-size:0.75rem;color:var(--muted);">${volList.length} volunteered</span>`
           : '');
 
-      const linkHtml = link && !link.startsWith('REPLACE')
-        ? `<a href="${link}" target="_blank" style="font-size:0.78rem;color:var(--orange);font-weight:600;text-decoration:none;">View draft &rarr;</a>`
-        : '';
-
       return `
         <div class="module-card ${statusType === 'assigned-me' ? 'assigned' : statusType === 'assigned-other' ? 'assigned-other' : ''}">
           <div class="module-card-left">
             <div class="module-meta">
-              ${prodLine ? `<span class="module-tag">${prodLine}</span>` : ''}
-              ${domain ? `<span class="module-tag">${domain}</span>` : ''}
-              ${subdomain ? `<span class="module-tag" style="background:#f0f4ff;color:var(--navy);">${subdomain}</span>` : ''}
+              ${prodLine ? `<span class="module-tag">${prodLine.trim()}</span>` : ''}
+              ${domain ? `<span class="module-tag" style="background:#f0f4ff;color:var(--navy);">${domain.trim()}</span>` : ''}
             </div>
-            <div class="module-name">${name}</div>
-            ${desc ? `<div class="module-desc">${desc}</div>` : ''}
-            ${assignedTo && statusType !== 'assigned-me' ? `<div class="module-assignee">Assigned to <strong>${assignedTo}</strong></div>` : ''}
-            ${linkHtml}
+            <div class="module-name">${escHtml(topic.trim())}</div>
+            ${assignee && statusType !== 'assigned-me' ? `<div class="module-assignee">Assigned to <strong>${escHtml(assignee.trim())}</strong></div>` : ''}
           </div>
           <div class="module-card-right" style="display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem;">
             ${badge}
