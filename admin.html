@@ -982,8 +982,13 @@
         return;
       }
 
-      // Fetch volunteer records
-      const volSnap = await getDocs(collection(db, 'moduleVolunteers'));
+      // Fetch volunteer records, overrides, and upload statuses in parallel
+      const [volSnap, overrideSnap, statusSnap] = await Promise.all([
+        getDocs(collection(db, 'moduleVolunteers')),
+        getDocs(collection(db, 'moduleAssignments')),
+        getDocs(collection(db, 'moduleStatus')),
+      ]);
+
       const volunteers = {};
       volSnap.forEach(d => {
         const v = d.data();
@@ -991,9 +996,17 @@
         volunteers[v.moduleId].push(v);
       });
 
-      // Fetch admin overrides. Schema: { added: string[], removed: string[] } per module.
-      // Legacy records may have { assignedTo: string } — treat as { added: [assignedTo], removed: [] }.
-      const overrideSnap = await getDocs(collection(db, 'moduleAssignments'));
+      // uploadedBy: moduleId -> Set of emails that marked uploaded
+      const uploadedBy = {};
+      statusSnap.forEach(d => {
+        const s = d.data();
+        if (s.uploaded) {
+          if (!uploadedBy[s.moduleId]) uploadedBy[s.moduleId] = [];
+          uploadedBy[s.moduleId].push(s.displayName || s.email);
+        }
+      });
+
+      // Admin overrides. Schema: { added: string[], removed: string[] } per module.
       const overrides = {};
       overrideSnap.forEach(d => {
         const data = d.data();
@@ -1012,10 +1025,12 @@
       });
       const total = modules.length;
 
+      const uploadedCount = modules.filter(r => (uploadedBy[slugify(r[2])] || []).length > 0).length;
       sumEl.innerHTML = `
         <div class="summary-chip"><strong>${total}</strong> modules total</div>
         <div class="summary-chip ${unassigned.length ? 'warn' : ''}"><strong>${unassigned.length}</strong> unassigned</div>
-        <div class="summary-chip"><strong>${total - unassigned.length}</strong> assigned</div>`;
+        <div class="summary-chip"><strong>${total - unassigned.length}</strong> assigned</div>
+        <div class="summary-chip" style="color:var(--green);border-color:var(--green-border);background:var(--green-bg);"><strong>${uploadedCount}</strong> uploaded</div>`;
 
       const allPeople = [...new Set(modules.flatMap(r => {
         const id = slugify(r[2]);
@@ -1052,7 +1067,9 @@
             <td style="min-width:220px;">
               <div style="font-weight:700;color:var(--navy);font-size:0.9rem;">${escHtml(topic.trim())}</div>
             </td>
-            <td><span style="color:var(--muted);">—</span></td>
+            <td>${(uploadedBy[id] || []).length
+              ? `<span style="font-size:0.78rem;font-weight:700;color:var(--green);">&#10003; Uploaded</span><div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">${escHtml((uploadedBy[id] || []).join(', '))}</div>`
+              : `<span style="color:var(--muted);font-size:0.78rem;">Not yet</span>`}</td>
             <td>
               ${assignees.length
                 ? assignees.map(a => `

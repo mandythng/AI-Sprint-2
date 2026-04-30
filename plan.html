@@ -1038,12 +1038,19 @@
 
       // Fetch volunteer records (skip when previewing without Firebase)
       const volunteers = {};
+      const uploadedByMe = new Set();
       if (AUTH_ENABLED) {
-        const volSnap = await getDocs(collection(db, 'moduleVolunteers'));
+        const [volSnap, statusSnap] = await Promise.all([
+          getDocs(collection(db, 'moduleVolunteers')),
+          getDocs(query(collection(db, 'moduleStatus'), where('email', '==', myEmail))),
+        ]);
         volSnap.forEach(d => {
           const v = d.data();
           if (!volunteers[v.moduleId]) volunteers[v.moduleId] = [];
           volunteers[v.moduleId].push(v);
+        });
+        statusSnap.forEach(d => {
+          if (d.data().uploaded) uploadedByMe.add(d.data().moduleId);
         });
       }
 
@@ -1051,6 +1058,25 @@
       const rowMatchesEmail = (r) => {
         const raw = (r[4] || '').toLowerCase();
         return raw.split(/[;\/\n]/).map(s => s.trim()).some(e => e === myEmail);
+      };
+
+      window.toggleUpload = async (moduleId, btn) => {
+        const isUploaded = uploadedByMe.has(moduleId);
+        btn.disabled = true;
+        try {
+          await setDoc(doc(db, 'moduleStatus', moduleId + '_' + myEmail), {
+            moduleId,
+            email: myEmail,
+            displayName: currentUser.displayName || myEmail,
+            uploaded: !isUploaded,
+            updatedAt: serverTimestamp(),
+          });
+          showToast(!isUploaded ? 'Marked as uploaded!' : 'Marked as not uploaded.', 'success');
+          loadTrackA();
+        } catch {
+          btn.disabled = false;
+          showToast('Failed to update. Please try again.', 'error');
+        }
       };
 
       const myModules = modules.filter(rowMatchesEmail);
@@ -1067,7 +1093,7 @@
         html += '<div class="module-grid" style="margin-bottom:1.5rem;">';
         myModules.forEach(r => {
           const id = slugify(r[2]);
-          html += renderModuleCard(r, id, 'assigned-me', volunteers, false);
+          html += renderModuleCard(r, id, 'assigned-me', volunteers, false, uploadedByMe.has(id));
         });
         html += '</div>';
       }
@@ -1104,13 +1130,15 @@
       el.innerHTML = html;
     }
 
-    function renderModuleCard(r, id, statusType, volunteers, canVolunteer) {
+    function renderModuleCard(r, id, statusType, volunteers, canVolunteer, uploaded = false) {
       const [prodLine, domain, topic, assignee] = r;
       const volList = (volunteers[id] || []);
 
       let badge = '';
       if (statusType === 'assigned-me') {
-        badge = `<span class="status-badge status-assigned-me">Assigned to you</span>`;
+        badge = uploaded
+          ? `<span class="status-badge" style="background:#f0faf4;color:var(--green);border:1px solid var(--green-border);">Uploaded</span>`
+          : `<span class="status-badge status-assigned-me">Assigned to you</span>`;
       } else if (statusType === 'unassigned') {
         badge = `<span class="status-badge status-unassigned">Unassigned</span>`;
       } else {
@@ -1123,6 +1151,16 @@
           ? `<span style="font-size:0.75rem;color:var(--muted);">${volList.length} volunteered</span>`
           : '');
 
+      const uploadToggle = statusType === 'assigned-me' ? `
+        <button onclick="toggleUpload('${id}', this)" style="
+          margin-top:0.5rem;display:inline-flex;align-items:center;gap:0.4rem;
+          background:none;border:1.5px solid ${uploaded ? 'var(--green)' : 'var(--border)'};
+          color:${uploaded ? 'var(--green)' : 'var(--muted)'};
+          font-size:0.75rem;font-weight:600;padding:0.3rem 0.75rem;
+          border-radius:6px;cursor:pointer;transition:all 0.15s;">
+          ${uploaded ? '&#10003; Uploaded' : 'Mark as uploaded'}
+        </button>` : '';
+
       return `
         <div class="module-card ${statusType === 'assigned-me' ? 'assigned' : statusType === 'assigned-other' ? 'assigned-other' : ''}">
           <div class="module-card-left">
@@ -1132,6 +1170,7 @@
             </div>
             <div class="module-name">${escHtml(topic.trim())}</div>
             ${assignee && statusType !== 'assigned-me' ? `<div class="module-assignee">Assigned to <strong>${escHtml(assignee.trim())}</strong></div>` : ''}
+            ${uploadToggle}
           </div>
           <div class="module-card-right" style="display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem;">
             ${badge}
