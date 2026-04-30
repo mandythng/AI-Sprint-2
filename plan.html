@@ -1043,19 +1043,19 @@
       const volunteers = {};
       const uploadedByMe = new Set();
       if (AUTH_ENABLED) {
-        const [volSnap, statusSnap] = await Promise.all([
-          getDocs(collection(db, 'moduleVolunteers')),
-          getDocs(collection(db, 'moduleStatus')),
-        ]);
+        const volSnap = await getDocs(collection(db, 'moduleVolunteers'));
         volSnap.forEach(d => {
           const v = d.data();
           if (!volunteers[v.moduleId]) volunteers[v.moduleId] = [];
           volunteers[v.moduleId].push(v);
         });
-        statusSnap.forEach(d => {
-          const s = d.data();
-          if (s.uploaded && s.email === myEmail) uploadedByMe.add(s.moduleId);
-        });
+        try {
+          const statusSnap = await getDocs(collection(db, 'moduleStatus'));
+          statusSnap.forEach(d => {
+            const s = d.data();
+            if (s.uploaded && s.email === myEmail) uploadedByMe.add(s.moduleId);
+          });
+        } catch { /* moduleStatus rules not yet deployed — skip silently */ }
       }
 
       // Match email: col 4 may contain multiple emails separated by ; or /
