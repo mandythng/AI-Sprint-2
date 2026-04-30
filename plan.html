@@ -1045,7 +1045,7 @@
       if (AUTH_ENABLED) {
         const [volSnap, statusSnap] = await Promise.all([
           getDocs(collection(db, 'moduleVolunteers')),
-          getDocs(query(collection(db, 'moduleStatus'), where('email', '==', myEmail))),
+          getDocs(collection(db, 'moduleStatus')),
         ]);
         volSnap.forEach(d => {
           const v = d.data();
@@ -1053,7 +1053,8 @@
           volunteers[v.moduleId].push(v);
         });
         statusSnap.forEach(d => {
-          if (d.data().uploaded) uploadedByMe.add(d.data().moduleId);
+          const s = d.data();
+          if (s.uploaded && s.email === myEmail) uploadedByMe.add(s.moduleId);
         });
       }
 
