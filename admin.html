@@ -982,11 +982,10 @@
         return;
       }
 
-      // Fetch volunteer records, overrides, and upload statuses in parallel
-      const [volSnap, overrideSnap, statusSnap] = await Promise.all([
+      // Fetch volunteer records and overrides in parallel; status fetched separately with fallback
+      const [volSnap, overrideSnap] = await Promise.all([
         getDocs(collection(db, 'moduleVolunteers')),
         getDocs(collection(db, 'moduleAssignments')),
-        getDocs(collection(db, 'moduleStatus')),
       ]);
 
       const volunteers = {};
@@ -996,15 +995,18 @@
         volunteers[v.moduleId].push(v);
       });
 
-      // uploadedBy: moduleId -> Set of emails that marked uploaded
+      // uploadedBy: moduleId -> list of display names that marked uploaded
       const uploadedBy = {};
-      statusSnap.forEach(d => {
-        const s = d.data();
-        if (s.uploaded) {
-          if (!uploadedBy[s.moduleId]) uploadedBy[s.moduleId] = [];
-          uploadedBy[s.moduleId].push(s.displayName || s.email);
-        }
-      });
+      try {
+        const statusSnap = await getDocs(collection(db, 'moduleStatus'));
+        statusSnap.forEach(d => {
+          const s = d.data();
+          if (s.uploaded) {
+            if (!uploadedBy[s.moduleId]) uploadedBy[s.moduleId] = [];
+            uploadedBy[s.moduleId].push(s.displayName || s.email);
+          }
+        });
+      } catch { /* rules not yet deployed — status column shows Not yet */ }
 
       // Admin overrides. Schema: { added: string[], removed: string[] } per module.
       const overrides = {};
@@ -1284,12 +1286,12 @@
       const sumEl = document.getElementById('trackCSummary');
 
       const [ideasSnap, volSnap, upvoteSnap, buildPlansSnap, fbSnap, ideaFbSnap] = await Promise.all([
-        getDocs(query(collection(db, 'trackCIdeas'), orderBy('createdAt', 'desc'))),
-        getDocs(collection(db, 'trackCVolunteers')),
-        getDocs(collection(db, 'trackCUpvotes')),
-        getDocs(query(collection(db, 'trackCBuildPlans'), orderBy('createdAt', 'desc'))),
-        getDocs(collection(db, 'trackCBuildFeedback')),
-        getDocs(collection(db, 'trackCIdeaFeedback')),
+        getDocs(query(collection(db, 'trackCIdeas'), orderBy('createdAt', 'desc'))).catch(() => ({ forEach: () => {}, size: 0 })),
+        getDocs(collection(db, 'trackCVolunteers')).catch(() => ({ forEach: () => {}, size: 0 })),
+        getDocs(collection(db, 'trackCUpvotes')).catch(() => ({ forEach: () => {}, size: 0 })),
+        getDocs(query(collection(db, 'trackCBuildPlans'), orderBy('createdAt', 'desc'))).catch(() => ({ forEach: () => {}, size: 0 })),
+        getDocs(collection(db, 'trackCBuildFeedback')).catch(() => ({ forEach: () => {}, size: 0 })),
+        getDocs(collection(db, 'trackCIdeaFeedback')).catch(() => ({ forEach: () => {}, size: 0 })),
       ]);
 
       const ideas = [];
