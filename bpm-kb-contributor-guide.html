@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KB Overview | AI Sprint 2</title>
+  <style>
+    :root {
+      --orange: #EE4D2D;
+      --navy: #113366;
+      --navy-light: #1a4a8a;
+      --bg: #f2f4f8;
+      --white: #ffffff;
+      --text: #1a1a2e;
+      --muted: #6b7280;
+      --border: #dde1ea;
+      --green: #1a6b3c;
+      --green-bg: #ecfdf5;
+      --amber: #92400e;
+      --amber-bg: #fffbeb;
+      --amber-border: #fcd34d;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    nav {
+      background: var(--navy);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo { color: var(--white); font-weight: 700; font-size: 1rem; }
+    .nav-logo span { color: var(--orange); }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--white); }
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(255,255,255,0.85);
+      font-size: 0.8rem;
+    }
+    .nav-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    .nav-avatar-initials {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.25);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .nav-signout {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    .nav-signout:hover { color: rgba(255,255,255,0.85); }
+
+    .auth-gate {
+      min-height: calc(100vh - 56px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .auth-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      max-width: 420px;
+      width: 100%;
+    }
+    .auth-card .lock-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .auth-card h2 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 0.5rem;
+    }
+    .auth-card p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+    .btn-google {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--white);
+      border: 2px solid var(--border);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+    }
+    .btn-google:hover { border-color: var(--navy); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn-google svg { flex-shrink: 0; }
+
+    .main-content { display: none; }
+    .kb-shell {
+      min-height: calc(100vh - 56px);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 20px;
+      overflow: auto;
+    }
+
+    .page {
+      width: 1122px;
+      height: 794px;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      color: var(--text);
+      transform-origin: top left;
+      flex-shrink: 0;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+      color: #fff;
+      padding: 0 20px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .h-eyebrow {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 2px;
+    }
+    .h-title { font-size: 19px; font-weight: 800; }
+    .h-title span { color: var(--orange); }
+    .h-badge {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 6px;
+      padding: 5px 14px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .h-badge .b-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.55);
+    }
+    .h-badge .b-val { font-size: 13px; font-weight: 800; }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 14px;
+      gap: 8px;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .what-strip {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--navy);
+      border-radius: 8px;
+      padding: 9px 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+    .what-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--orange);
+      white-space: nowrap;
+    }
+    .what-divider { width: 1px; background: var(--border); align-self: stretch; flex-shrink: 0; }
+    .what-text { font-size: 11.5px; color: var(--text); line-height: 1.55; }
+    .what-text strong { color: var(--navy); }
+
+    .phases-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .phase-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      overflow: hidden;
+    }
+    .phase-card.active {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 2px rgba(238,77,45,0.1);
+    }
+    .phase-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .p1 .phase-head { background: rgba(238,77,45,0.06); }
+    .p2 .phase-head { background: rgba(26,74,138,0.05); }
+    .p3 .phase-head { background: rgba(26,107,60,0.05); }
+    .phase-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .p1 .phase-num { background: var(--orange); }
+    .p2 .phase-num { background: #1a4a8a; }
+    .p3 .phase-num { background: var(--green); }
+    .phase-title { font-size: 15px; font-weight: 800; color: var(--navy); flex: 1; }
+    .phase-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .active .phase-badge { background: rgba(238,77,45,0.1); color: var(--orange); border: 1px solid rgba(238,77,45,0.25); }
+    .p2 .phase-badge { background: rgba(26,74,138,0.08); color: #1a4a8a; border: 1px solid rgba(26,74,138,0.2); }
+    .p3 .phase-badge { background: var(--green-bg); color: var(--green); border: 1px solid #6ee7b7; }
+    .phase-steps { padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+    .step { display: flex; align-items: flex-start; gap: 7px; }
+    .step-id {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 6px;
+      border-radius: 3px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .p1 .step-id { background: rgba(238,77,45,0.1); color: var(--orange); }
+    .p2 .step-id { background: rgba(26,74,138,0.08); color: #1a4a8a; }
+    .p3 .step-id { background: var(--green-bg); color: var(--green); }
+    .step-label { font-size: 13px; font-weight: 700; color: var(--navy); line-height: 1.3; }
+    .step-desc { font-size: 11px; color: var(--muted); line-height: 1.35; margin-top: 2px; }
+    .step.inactive .step-id { background: #f1f5f9 !important; color: #94a3b8 !important; border: 1px solid #e2e8f0 !important; }
+    .step.inactive .step-label { color: #94a3b8; }
+    .step.inactive .step-desc { color: #cbd5e1; }
+    .step.secondary .step-id { background: rgba(17,51,102,0.08) !important; color: var(--navy) !important; border: 1px solid rgba(17,51,102,0.18) !important; }
+
+    .bottom-row {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-head {
+      padding: 7px 12px 6px;
+      border-bottom: 1px solid var(--border);
+      background: #fafbff;
+      flex-shrink: 0;
+    }
+    .card-eyebrow {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--orange);
+      margin-bottom: 1px;
+    }
+    .card-title { font-size: 13px; font-weight: 800; color: var(--navy); }
+    .card-body { padding: 8px 10px; flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+
+    .folder-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; padding: 0 !important; }
+    .folder-row {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .folder-row:last-child { border-bottom: none; }
+    .folder-row.warn { background: var(--amber-bg); }
+    .f-num {
+      font-size: 10px;
+      font-weight: 800;
+      color: #fff;
+      background: rgba(17,51,102,0.25);
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .folder-row.warn .f-num { background: rgba(146,64,14,0.2); color: var(--amber); }
+    .f-name { font-size: 13px; font-weight: 700; color: var(--navy); white-space: nowrap; min-width: 175px; }
+    .folder-row.warn .f-name { color: var(--amber); }
+    .f-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+    .warn-tag {
+      display: inline-block;
+      font-size: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 1px 4px;
+      border-radius: 2px;
+      background: rgba(245,158,11,0.15);
+      color: #b45309;
+      border: 1px solid var(--amber-border);
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    .add-body { flex: 1; display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
+    .add-opts-grid { display: grid; grid-template-columns: 1fr; gap: 6px; flex: 1; min-height: 0; }
+    .add-opt {
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 10px 10px;
+      background: #f8f9fd;
+      display: flex;
+      flex-direction: column;
+    }
+    .add-opt-head { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+    .add-title { font-size: 12px; font-weight: 700; color: var(--navy); }
+    .add-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+    .invoke-list { margin-top: 6px; list-style: none; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+    .invoke-list li { font-size: 10.5px; color: var(--text); line-height: 1.45; padding-left: 12px; position: relative; }
+    .invoke-list li::before { content: '•'; position: absolute; left: 0; color: var(--navy-light); font-size: 12px; line-height: 1.2; }
+    .invoke-list li.eg { color: var(--muted); font-style: italic; }
+    .invoke-list code {
+      font-family: 'SF Mono', 'Consolas', monospace;
+      font-size: 10px;
+      background: rgba(17,51,102,0.07);
+      padding: 0 4px;
+      border-radius: 3px;
+      color: var(--navy);
+      font-style: normal;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; }
+    .add-steps { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 6px; }
+    .add-step { display: flex; align-items: flex-start; gap: 7px; }
+    .add-step-num {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .add-step-content { flex: 1; }
+    .add-step-label { font-size: 11px; font-weight: 700; color: var(--navy); }
+    .add-step-body { font-size: 10.5px; color: var(--muted); line-height: 1.4; margin-top: 1px; }
+    .add-step-body a { color: var(--navy-light); text-decoration: none; border-bottom: 1px solid rgba(26,74,138,0.3); }
+    .add-step-codes { margin-top: 3px; display: flex; flex-direction: column; gap: 2px; }
+    .add-step-codes code {
+      font-family: 'SF Mono', 'Consolas', monospace;
+      font-size: 10px;
+      background: rgba(17,51,102,0.07);
+      padding: 2px 7px;
+      border-radius: 3px;
+      color: var(--navy);
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chip {
+      font-size: 10px;
+      padding: 1px 7px;
+      border-radius: 3px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .metrics-note {
+      background: var(--amber-bg);
+      border: 1px solid var(--amber-border);
+      border-left: 3px solid #f59e0b;
+      border-radius: 7px;
+      padding: 8px 10px;
+      display: flex;
+      gap: 7px;
+      flex-shrink: 0;
+    }
+    .mc-title { font-size: 11px; font-weight: 800; color: var(--amber); margin-bottom: 2px; }
+    .mc-body { font-size: 10.5px; color: #78350f; line-height: 1.45; }
+
+    @media (max-width: 768px) {
+      nav {
+        padding: 0 1rem;
+        height: auto;
+        min-height: 56px;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+      .nav-links {
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 0.75rem 0;
+      }
+      .kb-shell { padding: 16px; }
+    }
+
+    @media print {
+      body { background: white; padding: 0; }
+      nav, .auth-gate { display: none !important; }
+      .main-content { display: block !important; }
+      .kb-shell {
+        min-height: auto;
+        padding: 0;
+        overflow: visible;
+      }
+      .page {
+        width: 297mm;
+        height: 210mm;
+        box-shadow: none;
+        border-radius: 0;
+        transform: none !important;
+        margin: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">AI Sprint <span>2</span></div>
+    <div class="nav-links">
+      <a href="index.html">Briefing</a>
+      <a href="bpm-kb-contributor-guide.html" class="active">KB overview</a>
+      <a href="plan.html">My Plan</a>
+      <a href="admin.html" id="navAdminLink" style="display:none;">Admin</a>
+      <div class="nav-user" id="navUser" style="display:none;">
+        <img class="nav-avatar" id="navAvatar" src="" alt="" style="display:none;" onerror="this.style.display='none';document.getElementById('navAvatarInitials').style.display='flex';" />
+        <span class="nav-avatar-initials" id="navAvatarInitials" style="display:none;"></span>
+        <span id="navName"></span>
+        <button class="nav-signout" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="auth-gate" id="authGate" style="display:none;">
+    <div class="auth-card">
+      <div class="lock-icon">🔒</div>
+      <h2>Sign in to view the KB overview</h2>
+      <p>Use your Shopee Google account to access the contributor guide alongside the Sprint 2 briefing and plan pages.</p>
+      <button class="btn-google" onclick="signInWithGoogle()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58Z" fill="#EA4335"/>
+        </svg>
+        Sign in with Google
+      </button>
+    </div>
+  </div>
+
+  <div class="main-content" id="mainContent">
+    <div class="kb-shell" id="kbShell">
+      <div class="page" id="page">
+
+        <header>
+          <div>
+            <div class="h-eyebrow">BPM / FPM Team · Supply Chain</div>
+            <div class="h-title">Knowledge Base — <span>Contributor Guide</span></div>
+          </div>
+          <div class="h-badge">
+            <div class="b-label">Now active</div>
+            <div class="b-val">Phase 1 · Sprint 2 · May 4–5</div>
+          </div>
+        </header>
+
+        <div class="main">
+
+          <div class="what-strip">
+            <div class="what-label">What is this</div>
+            <div class="what-divider"></div>
+            <div class="what-text">
+              The <strong>Supply Chain KB</strong> stores all <strong>product and business knowledge</strong> — specs, guides, decisions, metrics, and context — so the team can get accurate answers without chasing files or people.
+              &nbsp;<strong>Your job right now:</strong> get the right files into the right folders. The pipeline does the rest.
+            </div>
+          </div>
+
+          <div class="phases-row">
+
+            <div class="phase-card p1 active">
+              <div class="phase-head">
+                <div class="phase-num">1</div>
+                <div class="phase-title">Business Context</div>
+                <div class="phase-badge">You are here · Sprint 2</div>
+              </div>
+              <div class="phase-steps">
+                <div class="step">
+                  <div class="step-id">1a</div>
+                  <div><div class="step-label">BPM contributes raw files</div><div class="step-desc">Add shortcuts or .md files into the right domain folder — content lives in Google Drive</div></div>
+                </div>
+                <div class="step secondary">
+                  <div class="step-id">1b</div>
+                  <div><div class="step-label">PIC promotes to KB</div><div class="step-desc">Designated PIC reviews and promotes files using pipeline rules</div></div>
+                </div>
+                <div class="step secondary">
+                  <div class="step-id">1c</div>
+                  <div><div class="step-label">Evaluation</div><div class="step-desc">Output reviewed against quality criteria before opening to users</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="phase-card p2">
+              <div class="phase-head">
+                <div class="phase-num">2</div>
+                <div class="phase-title">Product Logic</div>
+                <div class="phase-badge">Post-sprint</div>
+              </div>
+              <div class="phase-steps">
+                <div class="step">
+                  <div class="step-id">2a</div>
+                  <div><div class="step-label">Dev generates KB</div><div class="step-desc">Dev loads product knowledge from PRDs and code via automated pipeline — hosted on a portal (site) accessible by Claude</div></div>
+                </div>
+                <div class="step">
+                  <div class="step-id">2b</div>
+                  <div><div class="step-label">Evaluation</div><div class="step-desc">LLM-assisted review of KB quality and coverage before merge</div></div>
+                </div>
+                <div class="step">
+                  <div class="step-id">2c</div>
+                  <div><div class="step-label">Business context promoted to portal</div><div class="step-desc">Promoted Phase 1 files move from Google Drive into the portal alongside product KB</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="phase-card p3">
+              <div class="phase-head">
+                <div class="phase-num">3</div>
+                <div class="phase-title">KB Live for Users</div>
+                <div class="phase-badge">End-May target</div>
+              </div>
+              <div class="phase-steps">
+                <div class="step">
+                  <div class="step-id">3</div>
+                  <div><div class="step-label">Query via portal</div><div class="step-desc">Team can ask any product or business question — answers cite source documents</div></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="bottom-row">
+
+            <div class="card">
+              <div class="card-head">
+                <div class="card-eyebrow">What to fill in</div>
+                <div class="card-title">Folder structure (per domain) &nbsp;<a href="https://drive.google.com/drive/folders/1wk3y4aHj7BRxT43pyj2-VAtF5uYEMcwL" target="_blank" style="font-size:10px;font-weight:600;color:var(--navy-light);text-decoration:none;border-bottom:1px solid rgba(26,74,138,0.3);">Open in Drive ↗</a></div>
+              </div>
+              <div class="folder-body">
+                <div class="folder-row"><div class="f-num">1</div><div class="f-name">📘 User Guides</div><div class="f-desc">Slides, docs, PDFs, Confluence pages — any user-facing how-to in any format</div></div>
+                <div class="folder-row"><div class="f-num">2</div><div class="f-name">🎙️ BPM Weekly Sharing</div><div class="f-desc">Weekly sharing decks, recorded or minuted sessions</div></div>
+                <div class="folder-row"><div class="f-num">3</div><div class="f-name">📋 BRD</div><div class="f-desc">Add the full BRD file as a shortcut. Business requirements and scope decisions</div></div>
+                <div class="folder-row"><div class="f-num">4</div><div class="f-name">✅ UAT</div><div class="f-desc">UAT docs, test cases, sign-off records — add as shortcut</div></div>
+                <div class="folder-row warn"><div class="f-num">5</div><div class="f-name">📊 Product Metrics<br><span class="warn-tag" style="margin-left:0;margin-top:3px;display:inline-block;">extra step</span></div><div class="f-desc">Add metric file + a .md explaining how to use it / offline dashboard</div></div>
+                <div class="folder-row"><div class="f-num">6</div><div class="f-name">📝 Meeting Minutes</div><div class="f-desc">BAU meetings, key decisions, action items. Shortcut or pasted .md text</div></div>
+                <div class="folder-row"><div class="f-num">7</div><div class="f-name">📋 FRF</div><div class="f-desc">Feature requests — add as shortcut</div></div>
+                <div class="folder-row"><div class="f-num">8</div><div class="f-name">📁 Others</div><div class="f-desc">Other relevant files that don't fit the categories above</div></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div class="card-eyebrow">Phase 1 — How to contribute</div>
+                <div class="card-title">How to add content</div>
+              </div>
+              <div class="card-body">
+                <div class="add-body">
+                  <div class="add-opts-grid">
+                    <div class="add-opt">
+                      <div class="add-opt-head">
+                        <span class="add-title">GDrive Shortcut</span>
+                      </div>
+                      <div class="add-desc">File already exists in Drive. Open Claude in the KB folder and paste the link — Claude places a native shortcut automatically.</div>
+                      <div class="add-steps">
+                        <div class="add-step">
+                          <div class="add-step-num">1</div>
+                          <div class="add-step-content">
+                            <div class="add-step-label">Open Claude Code in the KB folder</div>
+                            <div class="add-step-body"><a href="https://drive.google.com/drive/folders/1wk3y4aHj7BRxT43pyj2-VAtF5uYEMcwL?usp=drive_link" target="_blank">Open in Drive ↗</a> — launch Claude Code from this folder</div>
+                          </div>
+                        </div>
+                        <div class="add-step">
+                          <div class="add-step-num">2</div>
+                          <div class="add-step-content">
+                            <div class="add-step-label">Send these two prompts</div>
+                            <div class="add-step-codes">
+                              <code>read claude.md</code>
+                              <code>add https://docs.google.com/… [paste your file URL]</code>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="add-step">
+                          <div class="add-step-num">3</div>
+                          <div class="add-step-content">
+                            <div class="add-step-label">Confirm save location</div>
+                            <div class="add-step-body">Claude will ask you to confirm where the shortcut will be saved — review and approve</div>
+                          </div>
+                        </div>
+                        <div class="add-step">
+                          <div class="add-step-num">4</div>
+                          <div class="add-step-content">
+                            <div class="add-step-label">Approve and check output</div>
+                            <div class="add-step-body">Claude confirms the shortcut was created — verify the location is correct</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="chips" style="margin-top:8px;">
+                        <span class="chip">Existing slides deck</span>
+                        <span class="chip">BRD doc</span>
+                        <span class="chip">Dashboard link</span>
+                        <span class="chip">Confluence page</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="metrics-note">
+                    <div>⚠️</div>
+                    <div>
+                      <div class="mc-title">Metrics folder — extra .md required</div>
+                      <div class="mc-body">For every metric file, also include a <strong>.md</strong> explaining: (1) what the metric means and how to read it, (2) where to find it — portal or offline dashboard, (3) known caveats.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function scalePage() {
+      var page = document.getElementById('page');
+      var shell = document.getElementById('kbShell');
+      if (!page || !shell || shell.offsetParent === null) return;
+      var availableWidth = Math.max(shell.clientWidth - 40, 320);
+      var availableHeight = Math.max(shell.clientHeight - 40, 320);
+      var scaleX = availableWidth / 1122;
+      var scaleY = availableHeight / 794;
+      var scale = Math.min(scaleX, scaleY, 1);
+      page.style.transform = 'scale(' + scale + ')';
+      page.style.transformOrigin = 'top left';
+      page.style.marginLeft = Math.max(20, (shell.clientWidth - 1122 * scale) / 2) + 'px';
+      page.style.marginTop = '20px';
+      page.style.marginBottom = '20px';
+    }
+
+    window.addEventListener('resize', scalePage);
+    window.addEventListener('load', scalePage);
+  </script>
+  <script>
+    window.AUTH_ENABLED = true;
+  </script>
+  <script type="module">
+    const AUTH_ENABLED = window.AUTH_ENABLED;
+    let initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, fbSignOut, onAuthStateChanged;
+
+    if (AUTH_ENABLED) {
+      ({ initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'));
+      ({ getAuth, GoogleAuthProvider, signInWithPopup, signOut: fbSignOut, onAuthStateChanged }
+        = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js'));
+    }
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAs4RlHjZ7P4MPeDf5u7ka60sDTt0O6z4k",
+      authDomain: "bpm-ai-sprint2.firebaseapp.com",
+      projectId: "bpm-ai-sprint2",
+      storageBucket: "bpm-ai-sprint2.firebasestorage.app",
+      messagingSenderId: "1016418343117",
+      appId: "1:1016418343117:web:967008a66a871c265ab184"
+    };
+
+    const ADMIN_EMAILS = [
+      'amanda.thng@shopee.com', 'winarsita.sotyaji@shopee.com', 'stella.simsx@shopee.com',
+      'clarence.chngkh@shopee.com', 'yeanhuar.lee@shopee.com', 'wayne.sim@shopee.com',
+      'evelyn.lowyl@shopee.com', 'sarah.pan@shopee.com', 'qingwei.chua@shopee.com',
+      'nicholas.chanck@shopee.com', 'gerald.yip@shopee.com', 'shengwu.peh@shopee.com',
+      'shiliang.neoh@shopee.com', 'huifang.liu@shopee.com',
+    ];
+
+    const app = AUTH_ENABLED ? initializeApp(firebaseConfig) : null;
+    const auth = AUTH_ENABLED ? getAuth(app) : null;
+    const provider = AUTH_ENABLED ? new GoogleAuthProvider() : null;
+
+    window.signInWithGoogle = async () => {
+      try { await signInWithPopup(auth, provider); }
+      catch { console.error('Sign-in failed'); }
+    };
+
+    window.signOut = async () => { await fbSignOut(auth); };
+
+    function setNavAvatar(user) {
+      const img = document.getElementById('navAvatar');
+      const initials = document.getElementById('navAvatarInitials');
+      initials.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
+      if (user.photoURL) {
+        img.src = user.photoURL;
+        img.style.display = '';
+        initials.style.display = 'none';
+      } else {
+        img.style.display = 'none';
+        initials.style.display = 'flex';
+      }
+    }
+
+    function showMainContent() {
+      document.getElementById('authGate').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      requestAnimationFrame(scalePage);
+    }
+
+    if (!AUTH_ENABLED) {
+      showMainContent();
+    } else {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          showMainContent();
+          document.getElementById('navUser').style.display = 'flex';
+          setNavAvatar(user);
+          document.getElementById('navName').textContent = user.displayName || user.email;
+          if (ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+            document.getElementById('navAdminLink').style.display = '';
+          }
+        } else {
+          document.getElementById('authGate').style.display = 'flex';
+          document.getElementById('mainContent').style.display = 'none';
+          document.getElementById('navUser').style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

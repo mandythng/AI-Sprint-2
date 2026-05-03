@@ -546,6 +546,7 @@
     <div class="nav-right">
       <div class="nav-links">
         <a href="index.html">Briefing</a>
+        <a href="bpm-kb-contributor-guide.html">KB overview</a>
         <a href="plan.html">My Plan</a>
         <a href="admin.html" class="active">Admin</a>
       </div>
@@ -1519,7 +1520,7 @@
           }
           showToast('Idea feedback saved.', 'success');
           loadAdminTrackC();
-        } catch { showToast('Failed to save feedback.', 'error'); }
+        } catch (e) { console.error('saveCIdeaFeedback failed:', e); showToast('Failed to save feedback.', 'error'); }
       };
 
       window.saveCBuildFeedback = async (planId, participantEmail, existingFbId) => {
