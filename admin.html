@@ -165,6 +165,20 @@
     .filter-toggle.active { border-color: var(--orange); color: var(--orange); background: #fff8f7; }
     .filter-toggle:hover { border-color: var(--navy); color: var(--navy); }
     .filter-toggle.active:hover { border-color: var(--orange); color: var(--orange); }
+    .btn-export {
+      background: var(--navy);
+      border: 1px solid var(--navy);
+      color: var(--white);
+      border-radius: 6px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .btn-export:hover { opacity: 0.88; }
+    .btn-export:disabled { opacity: 0.45; cursor: default; }
 
     /* TABS */
     .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 1.5rem; }
@@ -661,6 +675,8 @@
           <div class="filter-divider"></div>
           <button class="filter-toggle" id="filterNoBuilder" onclick="toggleFilter('noBuilder')">No builder</button>
           <button class="filter-toggle" id="filterNoTester" onclick="toggleFilter('noTester')">No tester</button>
+          <div class="filter-divider"></div>
+          <button class="btn-export" id="exportTrackCBtn" onclick="exportTrackCData()">Export data</button>
         </div>
         <div id="trackCSummary" class="summary-row"></div>
         <div id="trackCAdmin">
@@ -937,6 +953,31 @@
         }
       })(tpl.content);
       return tpl.innerHTML;
+    }
+    function htmlToPlainText(raw) {
+      if (!raw) return '';
+      if (!/<[a-z][\s\S]*>/i.test(raw)) return raw.trim();
+      const tpl = document.createElement('template');
+      tpl.innerHTML = renderIdeaHtml(raw);
+      tpl.content.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
+      tpl.content.querySelectorAll('p, div, li').forEach(el => el.appendChild(document.createTextNode('\n')));
+      return (tpl.content.textContent || '').replace(/\n{3,}/g, '\n\n').trim();
+    }
+    function csvCell(value) {
+      const s = String(value ?? '');
+      return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+    function downloadCSV(filename, rows) {
+      const csv = rows.map(row => row.map(csvCell).join(',')).join('\r\n');
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     }
     function formatTs(ts) {
       if (!ts) return '';
@@ -1281,6 +1322,64 @@
       'Feature Education and Rollout',
       'Miscellaneous',
     ];
+
+    window.exportTrackCData = async () => {
+      const btn = document.getElementById('exportTrackCBtn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Exporting...'; }
+      try {
+        const [ideasSnap, volSnap] = await Promise.all([
+          getDocs(query(collection(db, 'trackCIdeas'), orderBy('createdAt', 'desc'))),
+          getDocs(collection(db, 'trackCVolunteers')),
+        ]);
+
+        const volByIdea = {};
+        volSnap.forEach(d => {
+          const v = d.data();
+          if (!volByIdea[v.ideaId]) volByIdea[v.ideaId] = [];
+          volByIdea[v.ideaId].push(v);
+        });
+
+        const rows = [[
+          'Audience',
+          'Phase',
+          'Idea',
+          'Project Name',
+          'Builders',
+          'Testers',
+        ]];
+
+        ideasSnap.forEach(d => {
+          const idea = { id: d.id, ...d.data() };
+          const vols = volByIdea[idea.id] || [];
+          const builders = vols
+            .filter(v => v.role === 'build')
+            .map(v => v.displayName || v.email)
+            .filter(Boolean);
+          const testers = vols
+            .filter(v => v.role === 'test')
+            .map(v => v.displayName || v.email)
+            .filter(Boolean);
+
+          rows.push([
+            '',
+            idea.category || '',
+            htmlToPlainText(idea.text),
+            '',
+            builders.length ? builders.join('; ') : (idea.displayName || idea.email || ''),
+            testers.join('; '),
+          ]);
+        });
+
+        const today = new Date().toISOString().slice(0, 10);
+        downloadCSV(`track-c-ideas-${today}.csv`, rows);
+        showToast(`Exported ${rows.length - 1} Track C idea${rows.length === 2 ? '' : 's'}.`, 'success');
+      } catch (e) {
+        console.error('exportTrackCData failed:', e);
+        showToast('Failed to export Track C data.', 'error');
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Export data'; }
+      }
+    };
 
     async function loadAdminTrackC() {
       const el = document.getElementById('trackCAdmin');
