@@ -982,6 +982,27 @@
       return rows;
     }
 
+    function normaliseName(s) {
+      return (s || '')
+        .toLowerCase()
+        .replace(/[^a-z\s]/g, ' ')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .sort()
+        .join(' ');
+    }
+
+    function fieldMatchesCurrentUserName(namesField) {
+      const myNameNorm = normaliseName(currentUser?.displayName);
+      if (!myNameNorm) return false;
+
+      return (namesField || '')
+        .split(/[+,;\/\n]/)
+        .map(normaliseName)
+        .some(name => name === myNameNorm);
+    }
+
     async function fetchCSV(url) {
       if (!url || url.startsWith('REPLACE')) return null;
       try {
@@ -1054,16 +1075,18 @@
           const statusSnap = await getDocs(collection(db, 'moduleStatus'));
           statusSnap.forEach(d => {
             const s = d.data();
-            if (s.uploaded && s.email === myEmail) uploadedByMe.add(s.moduleId);
+            if (s.uploaded && (s.email || '').toLowerCase() === myEmail) uploadedByMe.add(s.moduleId);
           });
         } catch { /* moduleStatus rules not yet deployed — skip silently */ }
       }
 
-      // Match email: col 4 may contain multiple emails separated by ; or /
+      // Match email first, then fall back to the Google profile name for account aliases.
+      // Assignee email/name fields may contain multiple people separated by ;, /, +, comma, or newline.
       const rowMatchesEmail = (r) => {
         const raw = (r[4] || '').toLowerCase();
-        return raw.split(/[;\/\n]/).map(s => s.trim()).some(e => e === myEmail);
+        return raw.split(/[;,\/\n]/).map(s => s.trim()).some(e => e === myEmail);
       };
+      const rowMatchesCurrentUser = (r) => rowMatchesEmail(r) || fieldMatchesCurrentUserName(r[3]);
 
       window.toggleUpload = async (moduleId, btn) => {
         const isUploaded = uploadedByMe.has(moduleId);
@@ -1084,11 +1107,11 @@
         }
       };
 
-      const myModules = modules.filter(rowMatchesEmail);
+      const myModules = modules.filter(rowMatchesCurrentUser);
       const unassigned = modules.filter(r => !(r[4] || '').trim());
       const others = modules.filter(r => {
         const raw = (r[4] || '').trim();
-        return raw && !rowMatchesEmail(r);
+        return raw && !rowMatchesCurrentUser(r);
       });
 
       let html = '';
@@ -1204,7 +1227,6 @@
       // Skip header; columns: 0=ToolName, 1=ProductLine, 2=BuiltBy, 3=Description, 4=Link, 5=Include(TRUE/FALSE)
       // Match by sorting each name's tokens alphabetically so "Qing Wei Chua" == "Chua Qing Wei".
       // Also falls back to plain substring match to handle nicknames like "Doan Thao Anh (Merry)".
-      const normaliseName = s => s.toLowerCase().replace(/[^a-z\s]/g, ' ').trim().split(/\s+/).sort().join(' ');
       const myName = (currentUser.displayName || '').toLowerCase().trim();
       const myNameNorm = normaliseName(myName);
       const nameMatches = (buildersField) => {
